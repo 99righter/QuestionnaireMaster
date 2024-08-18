@@ -15,24 +15,18 @@ import java.util.List;
 public class UserAnswerUpdateRequest implements Serializable {
 
     /**
-     * id
+     * 用户答案id
      */
     private Long id;
+    /**
+     * 应用 id
+     */
+    private Long appId;
 
     /**
-     * 标题
+     * 用户答案（JSON 数组）
      */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
+    private List<String> choices;
 
     private static final long serialVersionUID = 1L;
 }

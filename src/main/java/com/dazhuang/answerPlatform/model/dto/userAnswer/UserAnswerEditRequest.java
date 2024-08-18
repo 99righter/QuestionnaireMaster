@@ -1,8 +1,11 @@
 package com.dazhuang.answerPlatform.model.dto.userAnswer;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,26 +16,19 @@ import java.util.List;
  */
 @Data
 public class UserAnswerEditRequest implements Serializable {
-
     /**
-     * id
+     * 用户答案id
      */
     private Long id;
+    /**
+     * 应用 id
+     */
+    private Long appId;
 
     /**
-     * 标题
+     * 用户答案（JSON 数组）
      */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
+    private List<String> choices;
 
     private static final long serialVersionUID = 1L;
 }
