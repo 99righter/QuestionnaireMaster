@@ -3,11 +3,14 @@ package com.dazhuang.answerPlatform.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dazhuang.answerPlatform.model.dto.question.QuestionContentDTO;
 import com.dazhuang.answerPlatform.model.dto.question.QuestionQueryRequest;
+import com.dazhuang.answerPlatform.model.entity.App;
 import com.dazhuang.answerPlatform.model.entity.Question;
 import com.dazhuang.answerPlatform.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题目服务
@@ -50,4 +53,12 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request);
+
+    /**
+     * AI生成题目
+     * @param app APP
+     * @param questionNum 题目数量
+     * @param optionNum 选项数量
+     */
+    List<QuestionContentDTO> getAIGenerateQuestion(App app, int questionNum, int optionNum);
 }

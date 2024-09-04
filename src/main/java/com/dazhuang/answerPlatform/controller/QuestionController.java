@@ -1,5 +1,6 @@
 package com.dazhuang.answerPlatform.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dazhuang.answerPlatform.annotation.AuthCheck;
 import com.dazhuang.answerPlatform.common.BaseResponse;
@@ -9,21 +10,22 @@ import com.dazhuang.answerPlatform.common.ResultUtils;
 import com.dazhuang.answerPlatform.constant.UserConstant;
 import com.dazhuang.answerPlatform.exception.BusinessException;
 import com.dazhuang.answerPlatform.exception.ThrowUtils;
-import com.dazhuang.answerPlatform.model.dto.question.QuestionAddRequest;
-import com.dazhuang.answerPlatform.model.dto.question.QuestionEditRequest;
-import com.dazhuang.answerPlatform.model.dto.question.QuestionQueryRequest;
-import com.dazhuang.answerPlatform.model.dto.question.QuestionUpdateRequest;
+import com.dazhuang.answerPlatform.model.dto.question.*;
+import com.dazhuang.answerPlatform.model.entity.App;
 import com.dazhuang.answerPlatform.model.entity.Question;
 import com.dazhuang.answerPlatform.model.entity.User;
 import com.dazhuang.answerPlatform.model.vo.QuestionVO;
+import com.dazhuang.answerPlatform.service.AppService;
 import com.dazhuang.answerPlatform.service.QuestionService;
 import com.dazhuang.answerPlatform.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import netscape.javascript.JSObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题目接口
@@ -42,6 +44,8 @@ public class QuestionController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private AppService appService;
     // region 增删改查
 
     /**
@@ -54,14 +58,20 @@ public class QuestionController {
     @PostMapping("/add")
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(questionAddRequest == null, ErrorCode.PARAMS_ERROR);
-        // todo 在此处将实体类和 DTO 进行转换
+        //在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
+        List<QuestionContentDTO> questionContentDTO = questionAddRequest.getQuestionContent();
+        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         // 数据校验
         questionService.validQuestion(question, true);
-        // todo 填充默认值
+        //  填充默认值
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
+        // 填充应用id
+        List<QuestionContentDTO> questionContent = questionAddRequest.getQuestionContent();
+        Long appId = questionAddRequest.getAppId();
+        question.setAppId(appId);
         // 写入数据库
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -109,9 +119,11 @@ public class QuestionController {
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // todo 在此处将实体类和 DTO 进行转换
+        // 在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionUpdateRequest, question);
+        List<QuestionContentDTO> questionContentDTO = questionUpdateRequest.getQuestionContent();
+        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         // 数据校验
         questionService.validQuestion(question, false);
         // 判断是否存在
@@ -215,9 +227,11 @@ public class QuestionController {
         if (questionEditRequest == null || questionEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // todo 在此处将实体类和 DTO 进行转换
+        //  在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionEditRequest, question);
+        List<QuestionContentDTO> questionContentDTO = questionEditRequest.getQuestionContent();
+        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         // 数据校验
         questionService.validQuestion(question, false);
         User loginUser = userService.getLoginUser(request);

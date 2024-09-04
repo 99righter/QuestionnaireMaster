@@ -1,5 +1,6 @@
 package com.dazhuang.answerPlatform.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dazhuang.answerPlatform.annotation.AuthCheck;
 import com.dazhuang.answerPlatform.common.BaseResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 答题结果接口
@@ -57,6 +59,8 @@ public class ScoringResultController {
         // todo 在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultAddRequest, scoringResult);
+        List<String> resultProp = scoringResultAddRequest.getResultProp();
+        scoringResult.setResultProp(JSONUtil.toJsonStr(resultProp));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, true);
         // todo 填充默认值
@@ -112,6 +116,8 @@ public class ScoringResultController {
         // todo 在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultUpdateRequest, scoringResult);
+        List<String> resultProp = scoringResultUpdateRequest.getResultProp();
+        scoringResult.setResultProp(JSONUtil.toJsonStr(resultProp));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, false);
         // 判断是否存在
@@ -218,6 +224,8 @@ public class ScoringResultController {
         // todo 在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultEditRequest, scoringResult);
+        List<String> resultProp = scoringResultEditRequest.getResultProp();
+        scoringResult.setResultDesc(JSONUtil.toJsonStr(resultProp));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, false);
         User loginUser = userService.getLoginUser(request);
