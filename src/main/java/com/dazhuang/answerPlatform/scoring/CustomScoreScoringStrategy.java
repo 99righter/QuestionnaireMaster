@@ -17,6 +17,7 @@ import java.util.Optional;
 
 /**
  * 自定义打分雷应用
+ * 应用类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
  */
 @ScoringStrategyConfig(appType = 0, scoringStrategy = 0)
 public class CustomScoreScoringStrategy implements ScoringStrategy {
@@ -41,20 +42,62 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
         int totalScore = 0;
         QuestionVO questionVO = QuestionVO.objToVo(question);
         List<QuestionContentDTO> questionContentDTOS = questionVO.getQuestionContent();
-        //3.遍历题目列表
+        // todo 修改评分，应该同时遍历题目和选项，然后为了避免用户题目未作答就提交答案，需要先遍历用户答案
         for (QuestionContentDTO questionContentDTO : questionContentDTOS) {
             //遍历答案列表
-            for (String answer : choices) {
-                //遍历题目中的选项
-                for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
-                    if (option.getKey().equals(answer)) {
-                        //未设置值的为0
-                        int score = Optional.of(option.getScore()).orElse(0);
-                        totalScore += score;
-                    }
+//            for (String answer : choices) {
+//                System.out.println("当前遍历的题目编号为" + questionContentDTOS.indexOf(questionContentDTO) + "----当前遍历的答案编号为" + choices.indexOf(answer));
+//                //遍历题目中的选项
+//                for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
+//                    if (option.getKey().equals(answer)) {
+//                        //未设置值的为0
+//                        int score = Optional.of(option.getScore()).orElse(0);
+//                        totalScore += score;
+//                    }
+//                }
+//            }
+            //只打了5题，那么这个时候，第五题之后，也就是索引为5的就没有答案会发生数组越界了
+            int i = questionContentDTOS.indexOf(questionContentDTO);
+            if (i >= choices.size()) {
+                break;
+            }
+            String answer = choices.get(i);
+            //遍历题目中的选项
+            for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
+                if (option.getKey().equals(answer)) {
+                    //未设置值的为0
+                    int score = Optional.of(option.getScore()).orElse(0);
+                    totalScore += score;
                 }
             }
         }
+//        for (String answer : choices) {
+//            int i = choices.indexOf(answer);
+//            QuestionContentDTO questionContentDTO = questionContentDTOS.get(i);
+//            //遍历每题的选项
+//            for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
+//                if (option.getKey().equals(answer)) {
+//                    //未设置值的为0
+//                    int score = Optional.of(option.getScore()).orElse(0);
+//                    totalScore += score;
+//                }
+//            }
+//        }
+        //3.遍历题目列表
+//        for (QuestionContentDTO questionContentDTO : questionContentDTOS) {
+//            //遍历答案列表
+//            for (String answer : choices) {
+//                System.out.println("当前遍历的题目编号为" + questionContentDTOS.indexOf(questionContentDTO) + "----当前遍历的答案编号为" + choices.indexOf(answer));
+//                //遍历题目中的选项
+//                for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
+//                    if (option.getKey().equals(answer)) {
+//                        //未设置值的为0
+//                        int score = Optional.of(option.getScore()).orElse(0);
+//                        totalScore += score;
+//                    }
+//                }
+//            }
+//        }
         //4.遍历得分结果
         ScoringResult maxScoringResult = scoringResults.get(0);
         for (ScoringResult scoringResult : scoringResults) {

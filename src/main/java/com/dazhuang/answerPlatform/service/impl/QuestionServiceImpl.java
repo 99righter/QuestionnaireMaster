@@ -1,11 +1,13 @@
 package com.dazhuang.answerPlatform.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dazhuang.answerPlatform.common.ErrorCode;
+import com.dazhuang.answerPlatform.constant.AIGenerateSystemMessageConfig;
 import com.dazhuang.answerPlatform.constant.CommonConstant;
 import com.dazhuang.answerPlatform.exception.ThrowUtils;
 import com.dazhuang.answerPlatform.manager.AiManager;
@@ -22,16 +24,22 @@ import com.dazhuang.answerPlatform.service.AppService;
 import com.dazhuang.answerPlatform.service.QuestionService;
 import com.dazhuang.answerPlatform.service.UserService;
 import com.dazhuang.answerPlatform.utils.SqlUtils;
+import com.zhipu.oapi.service.v4.model.ModelData;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -73,10 +81,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // 创建数据时，参数不能为空
         if (add) {
             // 补充校验规则
-            ThrowUtils.throwIf(StringUtils.isBlank(questionContent), ErrorCode.PARAMS_ERROR,"问题为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(questionContent), ErrorCode.PARAMS_ERROR, "问题为空");
             App app = new App();
             app = appService.getById(appId);
-            ThrowUtils.throwIf(app == null,ErrorCode.PARAMS_ERROR,"应用不存在");
+            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "应用不存在");
 //            User user = userService.getById(userId);
 //            ThrowUtils.throwIf(user == null,ErrorCode.PARAMS_ERROR,"用户不存在");
 
@@ -163,7 +171,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 //            questionVO.setHasFavour(questionFavour != null);
 //        }
         // endregion
-        System.out.println("questionVO：---------------------"+questionVO);
+        System.out.println("questionVO：---------------------" + questionVO);
         return questionVO;
     }
 
@@ -226,12 +234,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // endregion
 
         questionVOPage.setRecords(questionVOList);
-        System.out.println("questionVOPage------------"+questionVOPage);
+        System.out.println("questionVOPage------------" + questionVOPage);
         return questionVOPage;
     }
 
     /**
      * 创建ai生成题目的用户消息
+     *
      * @param app
      * @param questionNum
      * @param optionNum
@@ -241,16 +250,75 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         StringBuilder userMessage = new StringBuilder();
         userMessage.append(app.getAppName()).append("\n");
         userMessage.append(app.getAppDesc()).append("\n");
-        userMessage.append(AppTypeEnum.getEnumByValue(app.getAppType()).getText()+"类").append("\n");
+        userMessage.append(AppTypeEnum.getEnumByValue(app.getAppType()).getText() + "类").append("\n");
         userMessage.append(questionNum).append("\n");
         userMessage.append(optionNum);
         return userMessage.toString();
     }
 
+    /**
+     * AI生成题目
+     *
+     * @param app         APP
+     * @param questionNum 题目数量
+     * @param optionNum   选项数量
+     * @return
+     */
     @Override
     public List<QuestionContentDTO> getAIGenerateQuestion(App app, int questionNum, int optionNum) {
         String userMessage = getUserManage(app, questionNum, optionNum);
+        String result = aiManager.doSyncRequest(AIGenerateSystemMessageConfig.AI_GENERATE_SYSTEM_MESSAGE, userMessage, null);
+        int startIndex = result.indexOf("[");
+        int endIndex = result.lastIndexOf("]");
+        String json = result.substring(startIndex, endIndex + 1);
+        List<QuestionContentDTO> questionContentDTOList = JSONUtil.toList(json, QuestionContentDTO.class);
+        return questionContentDTOList;
+    }
 
-        return null;
+    /**
+     * 获取AI生成题目的流式返回
+     * @param app APP
+     * @param questionNum 题目数量
+     * @param optionNum 选项数量
+     * @return
+     */
+    @Override
+    public SseEmitter getSseAIGenerateQuestion(App app, int questionNum, int optionNum) {
+        String userMessage = getUserManage(app, questionNum, optionNum);
+        //这里传入的参数0L表示不超时
+        SseEmitter sseEmitter = new SseEmitter(0L);
+        //AI生成流式返回
+        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(AIGenerateSystemMessageConfig.AI_GENERATE_SYSTEM_MESSAGE, userMessage, null);
+        StringBuilder contentBuilder = new StringBuilder();
+        //括号计数器
+        AtomicInteger index = new AtomicInteger(0);
+        modelDataFlowable.observeOn(Schedulers.io())
+                .map(chunk -> chunk.getChoices().get(0).getDelta().getContent())
+                .map(message -> message.replaceAll("\\s", ""))
+                .filter(StrUtil::isNotBlank)
+                .flatMap(message -> {
+                    //将数组转换为List<Character>
+                    List<Character> charList = new ArrayList<>();
+                    for (char c : message.toCharArray()) {
+                        charList.add(c);
+                    }
+                    return Flowable.fromIterable(charList);
+                })
+                .doOnNext(c -> {
+                    if (c == '{') {
+                        index.addAndGet(1);
+                    }
+                    if (index.get() > 0) {
+                        contentBuilder.append(c);
+                    }
+                    if (c == '}') {
+                        index.addAndGet(-1);
+                        if (index.get() == 0) {
+                            sseEmitter.send(JSONUtil.toJsonStr(contentBuilder.toString()));
+                            contentBuilder.setLength(0);
+                        }
+                    }
+                }).doOnComplete(sseEmitter::complete).subscribe();
+        return sseEmitter;
     }
 }

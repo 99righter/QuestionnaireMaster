@@ -8,6 +8,7 @@ import com.dazhuang.answerPlatform.model.dto.question.QuestionQueryRequest;
 import com.dazhuang.answerPlatform.model.entity.App;
 import com.dazhuang.answerPlatform.model.entity.Question;
 import com.dazhuang.answerPlatform.model.vo.QuestionVO;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -24,7 +25,7 @@ public interface QuestionService extends IService<Question> {
      * 校验数据
      *
      * @param question
-     * @param add 对创建的数据进行校验
+     * @param add      对创建的数据进行校验
      */
     void validQuestion(Question question, boolean add);
 
@@ -35,7 +36,7 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     QueryWrapper<Question> getQueryWrapper(QuestionQueryRequest questionQueryRequest);
-    
+
     /**
      * 获取题目封装
      *
@@ -56,9 +57,19 @@ public interface QuestionService extends IService<Question> {
 
     /**
      * AI生成题目
+     *
+     * @param app         APP
+     * @param questionNum 题目数量
+     * @param optionNum   选项数量
+     */
+    List<QuestionContentDTO> getAIGenerateQuestion(App app, int questionNum, int optionNum);
+
+    /**
+     * AI 流式生成题目
      * @param app APP
      * @param questionNum 题目数量
      * @param optionNum 选项数量
+     * @return 流式对象
      */
-    List<QuestionContentDTO> getAIGenerateQuestion(App app, int questionNum, int optionNum);
+    SseEmitter getSseAIGenerateQuestion(App app, int questionNum, int optionNum);
 }

@@ -3,15 +3,15 @@ package com.dazhuang.answerPlatform.manager;
 import com.dazhuang.answerPlatform.config.AiConfig;
 import com.zhipu.oapi.ClientV4;
 import com.zhipu.oapi.Constants;
-import com.zhipu.oapi.service.v4.model.ChatCompletionRequest;
-import com.zhipu.oapi.service.v4.model.ChatMessage;
-import com.zhipu.oapi.service.v4.model.ChatMessageRole;
-import com.zhipu.oapi.service.v4.model.ModelApiResponse;
+import com.zhipu.oapi.service.v4.model.*;
+import io.reactivex.Flowable;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class AiManager {
     /**
      * 稳定的温度
@@ -61,7 +61,6 @@ public class AiManager {
         List<ChatMessage> chatMessages = new ArrayList<>();
         chatMessages.add(systemChatMessage);
         chatMessages.add(userChatMessage);
-
         return doRequest(chatMessages, isStream, temperature);
     }
 
@@ -85,4 +84,56 @@ public class AiManager {
         ModelApiResponse invokeModelApiResponse = clientV4.invokeModelApi(chatCompletionRequest);
         return invokeModelApiResponse.getData().getChoices().get(0).toString();
     }
+
+    //regin 流式请求
+
+    /**
+     * 创建流式请求，生成一条返回一条
+     *
+     * @param chatMessages 对话消息
+     * @param temperature  随机性参数
+     * @return Flowable<ModelData> 流式返回
+     */
+    public Flowable<ModelData> doStreamRequest(List<ChatMessage> chatMessages, Float temperature) {
+        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
+                .model(Constants.ModelChatGLM4)
+                .maxTokens(1024)
+                .stream(Boolean.TRUE)
+                .invokeMethod(Constants.invokeMethod)
+                .messages(chatMessages)
+                .temperature(temperature)
+                .build();
+        ModelApiResponse invokeModelApiResponse = clientV4.invokeModelApi(chatCompletionRequest);
+        return invokeModelApiResponse.getFlowable();
+    }
+
+    /**
+     * 简化的流式返回调用
+     *
+     * @param systemMessage 系统prompt
+     * @param userMessage   用户消息
+     * @param temperature   随机性
+     * @return 流式返回
+     */
+    public Flowable<ModelData> doStreamRequest(String systemMessage, String userMessage, Float temperature) {
+        ChatMessage systemChatMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemMessage);
+        ChatMessage userChatMessage = new ChatMessage(ChatMessageRole.USER.value(), userMessage);
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        chatMessages.add(systemChatMessage);
+        chatMessages.add(userChatMessage);
+        return doStreamRequest(chatMessages, temperature);
+    }
+
+    /**
+     * 稳定的流式返回对象
+     *
+     * @param systemMessage 系统消息
+     * @param userMessage   用户消息
+     * @return 流式返回
+     */
+    public Flowable<ModelData> doStableStreamRequest(String systemMessage, String userMessage) {
+        return doStreamRequest(systemMessage, userMessage, STABLE_TEMPERATURE);
+    }
+
+    //endregion
 }

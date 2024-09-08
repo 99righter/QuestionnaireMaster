@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import netscape.javascript.JSObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -250,4 +251,42 @@ public class QuestionController {
     }
 
     // endregion
+
+    //region AI生成题目
+
+    /**
+     * AI生成题目
+     *
+     * @param aiGenerateRequest 前端发送的ai生成请求，包括appId，题目数量，选项数量
+     * @return
+     */
+    @PostMapping("/ai_generate")
+    public BaseResponse<List<QuestionContentDTO>> aiGenerateQuestion(@RequestBody AIGenerateRequest aiGenerateRequest) {
+        //判断请求参数是否未空
+        ThrowUtils.throwIf(aiGenerateRequest == null, ErrorCode.PARAMS_ERROR);
+        //获取请求参数
+        Long appId = aiGenerateRequest.getAppId();
+        Integer questionNum = aiGenerateRequest.getQuestionNum();
+        Integer optionNum = aiGenerateRequest.getOptionNum();
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+        //调用接口生成
+        List<QuestionContentDTO> questionContentDTOList = questionService.getAIGenerateQuestion(app, questionNum, optionNum);
+        return ResultUtils.success(questionContentDTOList);
+    }
+
+    @GetMapping("/ai_generate/sse")
+    public SseEmitter aiSseGenerateQuestion(AIGenerateRequest aiGenerateRequest) {
+        //判断请求参数是否未空
+        ThrowUtils.throwIf(aiGenerateRequest == null, ErrorCode.PARAMS_ERROR);
+        //获取请求参数
+        Long appId = aiGenerateRequest.getAppId();
+        Integer questionNum = aiGenerateRequest.getQuestionNum();
+        Integer optionNum = aiGenerateRequest.getOptionNum();
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+        //调用接口生成
+        SseEmitter sseAIGenerateQuestion = questionService.getSseAIGenerateQuestion(app, questionNum, optionNum);
+        return sseAIGenerateQuestion;
+    }
 }
