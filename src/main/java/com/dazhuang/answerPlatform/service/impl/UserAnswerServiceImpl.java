@@ -69,7 +69,7 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         // 创建数据时，参数不能为空
         if (add) {
             // todo 补充校验规则
-//            ThrowUtils.throwIf(ObjectUtils.isEmpty(id),ErrorCode.PARAMS_ERROR,"用户答案编号为空");
+            ThrowUtils.throwIf(ObjectUtils.isEmpty(id),ErrorCode.PARAMS_ERROR,"用户答案编号为空");
             ThrowUtils.throwIf(ObjectUtils.isEmpty(appId),ErrorCode.PARAMS_ERROR,"应用编号为空");
 //            AppTypeEnum appTypeEnum  = AppTypeEnum.getEnumByValue(appType);
 //            ThrowUtils.throwIf(appTypeEnum == null, ErrorCode.PARAMS_ERROR,"应用类型不存在");

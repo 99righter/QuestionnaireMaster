@@ -246,7 +246,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
      * @param optionNum
      * @return
      */
-    public static String getUserManage(App app, int questionNum, int optionNum) {
+    public  String getUserManage(App app, int questionNum, int optionNum) {
         StringBuilder userMessage = new StringBuilder();
         userMessage.append(app.getAppName()).append("\n");
         userMessage.append(app.getAppDesc()).append("\n");

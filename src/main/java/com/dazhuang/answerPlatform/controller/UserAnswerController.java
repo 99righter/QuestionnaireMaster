@@ -1,5 +1,6 @@
 package com.dazhuang.answerPlatform.controller;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dazhuang.answerPlatform.annotation.AuthCheck;
@@ -25,6 +26,7 @@ import com.dazhuang.answerPlatform.service.UserAnswerService;
 import com.dazhuang.answerPlatform.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -76,22 +78,26 @@ public class UserAnswerController {
         userAnswerService.validUserAnswer(userAnswer, true);
         //判断app是否存在
         App app = appService.getById(userAnswerAddRequest.getAppId());
-        if(app ==null){
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"应用不存在");
+        if (app == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "应用不存在");
         }
         //  填充默认值
         User loginUser = userService.getLoginUser(request);
         userAnswer.setUserId(loginUser.getId());
         userAnswer.setAppId(appId);
         // 写入数据库
-        boolean result = userAnswerService.save(userAnswer);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        try {
+            boolean result = userAnswerService.save(userAnswer);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        } catch (DuplicateKeyException e) {
+            //ignore error
+        }
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
         //调用评分模块
-
-        UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices,app);
+        UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
         userAnswerWithResult.setId(newUserAnswerId);
+        userAnswerWithResult.setAppId(null);
         userAnswerService.updateById(userAnswerWithResult);
         return ResultUtils.success(newUserAnswerId);
     }
@@ -180,8 +186,7 @@ public class UserAnswerController {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
         // 查询数据库
-        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size),
-                userAnswerService.getQueryWrapper(userAnswerQueryRequest));
+        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size), userAnswerService.getQueryWrapper(userAnswerQueryRequest));
         return ResultUtils.success(userAnswerPage);
     }
 
@@ -193,15 +198,13 @@ public class UserAnswerController {
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<UserAnswerVO>> listUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<UserAnswerVO>> listUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest, HttpServletRequest request) {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查询数据库
-        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size),
-                userAnswerService.getQueryWrapper(userAnswerQueryRequest));
+        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size), userAnswerService.getQueryWrapper(userAnswerQueryRequest));
         // 获取封装类
         return ResultUtils.success(userAnswerService.getUserAnswerVOPage(userAnswerPage, request));
     }
@@ -214,8 +217,7 @@ public class UserAnswerController {
      * @return
      */
     @PostMapping("/my/list/page/vo")
-    public BaseResponse<Page<UserAnswerVO>> listMyUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest,
-                                                                 HttpServletRequest request) {
+    public BaseResponse<Page<UserAnswerVO>> listMyUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(userAnswerQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 补充查询条件，只查询当前登录用户的数据
         User loginUser = userService.getLoginUser(request);
@@ -225,8 +227,7 @@ public class UserAnswerController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查询数据库
-        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size),
-                userAnswerService.getQueryWrapper(userAnswerQueryRequest));
+        Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size), userAnswerService.getQueryWrapper(userAnswerQueryRequest));
         // 获取封装类
         return ResultUtils.success(userAnswerService.getUserAnswerVOPage(userAnswerPage, request));
     }
@@ -266,4 +267,16 @@ public class UserAnswerController {
     }
 
     // endregion
+
+    //region 生成答题唯一id
+
+    /**
+     * 生成答题记录唯一id，保证这个接口是可供服用的，能够满足扩展是和单一职责
+     *
+     * @return
+     */
+    @GetMapping("/generate/id")
+    public BaseResponse<Long> generateUserAnswerId() {
+        return ResultUtils.success(IdUtil.getSnowflakeNextId());
+    }
 }

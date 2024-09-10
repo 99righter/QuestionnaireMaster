@@ -66,9 +66,10 @@ public interface QuestionService extends IService<Question> {
 
     /**
      * AI 流式生成题目
-     * @param app APP
+     *
+     * @param app         APP
      * @param questionNum 题目数量
-     * @param optionNum 选项数量
+     * @param optionNum   选项数量
      * @return 流式对象
      */
     SseEmitter getSseAIGenerateQuestion(App app, int questionNum, int optionNum);

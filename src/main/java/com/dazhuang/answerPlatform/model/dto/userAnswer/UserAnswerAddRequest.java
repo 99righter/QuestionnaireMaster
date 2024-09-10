@@ -16,7 +16,10 @@ import java.util.List;
  */
 @Data
 public class UserAnswerAddRequest implements Serializable {
-
+    /**
+     * 答案id
+     */
+    private Long id;
 
     /**
      * 应用 id
@@ -27,7 +30,6 @@ public class UserAnswerAddRequest implements Serializable {
      * 用户答案（JSON 数组）
      */
     private List<String> choices;
-
 
 
     private static final long serialVersionUID = 1L;
