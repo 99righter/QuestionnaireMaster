@@ -20,6 +20,16 @@
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
+    <select id="getAnswerGroupByApp" resultType="com.dazhuang.answerPlatform.model.dto.app.AppAnswerCountDTO">
+        select appId, count( userId) as answerCount from user_answer
+        group by appId order by answerCount desc limit 10
+    </select>
+    <select id="getAppAnswerResultCountGroupByResult"
+            resultType="com.dazhuang.answerPlatform.model.dto.app.AppAnswerResultCountDTO">
+        select resultName, count(resultName) as resultCount from user_answer
+        where appId = #{appId} group by resultName order by resultCount desc;
+
+    </select>
 
     <sql id="Base_Column_List">
         id,appId,appType,
