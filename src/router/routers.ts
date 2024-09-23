@@ -21,6 +21,7 @@ import DoAnswerPage from "@/views/answer/DoAnswerPage.vue";
 import AnswerResult from "@/views/answer/AnswerResult.vue";
 import MyAnswerPage from "@/views/answer/MyAnswerPage.vue";
 import UserCenter from "@/views/user/UserCenter.vue";
+import AdminBasePage from "@/views/admin/AdminBasePage.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -76,6 +77,14 @@ export const routes: Array<RouteRecordRaw> = [
       access: ACCESS_ENUM.ADMIN,
     },
     children: [
+      {
+        path: "/admin/statistics",
+        name: "应用统计",
+        component: AdminBasePage,
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+        },
+      },
       {
         path: "/admin/user",
         name: "用户管理",
@@ -195,9 +204,9 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/add/app/:id",
+    path: "/update/app/:appId",
     name: "修改应用",
-    component: AppDetail,
+    component: AddAppPage,
     props: true,
     meta: {
       hidInMenu: true,

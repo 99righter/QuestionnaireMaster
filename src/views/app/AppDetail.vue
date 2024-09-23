@@ -53,6 +53,10 @@ const loadData = async () => {
     message.error("获取应用详情失败," + res.data.message);
   }
 };
+const router = useRouter();
+const goPage = (path: string) => {
+  router.push(path);
+};
 /**
  * 监听变量
  */
@@ -89,17 +93,19 @@ watchEffect(() => {
             创建时间：{{ dayjs(data.createTime).format("YYYY-MM-DD HH:mm:ss") }}
           </p>
           <a-space size="large">
-            <a-button type="primary" :href="`/answer/do/${id}`"
-              >开始答题</a-button
-            >
+            <a-button type="primary" @click="goPage(`/answer/do/${id}`)"
+              >开始答题
+            </a-button>
             <a-button>分享应用</a-button>
-            <a-button v-if="isMine" :href="`/add/question/${id}`"
+            <a-button v-if="isMine" @click="goPage(`/add/question/${id}`)"
               >设置题目
             </a-button>
-            <a-button v-if="isMine" :href="`/add/scoringResult/${id}`"
+            <a-button v-if="isMine" @click="goPage(`/add/scoringResult/${id}`)"
               >设置评分规范
             </a-button>
-            <a-button v-if="isMine" :href="`/add/app/${id}`">修改应用</a-button>
+            <a-button v-if="isMine" @click="goPage(`/update/app/${id}`)"
+              >修改应用
+            </a-button>
           </a-space>
         </a-col>
         <a-col flex="340px">

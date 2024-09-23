@@ -24,7 +24,10 @@
             答题时间：{{ dayjs(data.createTime).format("YYYY-MM-DD HH:mm:ss") }}
           </p>
           <a-space size="medium">
-            <a-button type="primary" :href="`/answer/do/${data.appId}`">
+            <a-button
+              type="primary"
+              @click="goPage(`/answer/do/${data.appId}`)"
+            >
               去答题
             </a-button>
           </a-space>
@@ -44,6 +47,7 @@ import { getUserAnswerVoByIdUsingGet } from "@/api/userAnswerController";
 import message from "@arco-design/web-vue/es/message";
 import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
 import { dayjs } from "@arco-design/web-vue/es/_utils/date";
+import { useRouter } from "vue-router";
 
 interface Props {
   id: string;
@@ -73,7 +77,10 @@ const loadData = async () => {
     message.error("获取数据失败，" + res.data.message);
   }
 };
-
+const router = useRouter();
+const goPage = (path: string) => {
+  router.push(path);
+};
 /**
  * 监听变量，改变时触发数据的重新加载
  */

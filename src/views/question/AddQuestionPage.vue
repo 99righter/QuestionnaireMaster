@@ -11,6 +11,7 @@ import {
   listQuestionVoByPageUsingPost,
   updateQuestionUsingPost,
 } from "@/api/questionController";
+import AIGenerateDrawer from "@/views/question/AIGenerateDrawer.vue";
 
 /**
  * 定义题目列表
@@ -116,6 +117,30 @@ const loadQuestion = async () => {
     message.error("获取数据失败，" + res.data.message);
   }
 };
+const onAiGenrateQuestion = (result: API.QuestionContentDTO[]) => {
+  questionContent.value = [...questionContent.value, ...result];
+  message.success(`AI生成题目成功，生成了${result.length}道题目`);
+};
+/**
+ * AI生成题目流式返回
+ * @param result
+ */
+const generateQuestionCount = ref<number>(0);
+const generateSchedule = (generateNumber: any) => {
+  generateQuestionCount.value = generateNumber;
+};
+const currentGenerateNumber = ref<number>(0);
+const onAiGenerateSseSuccess = (result: API.QuestionContentDTO) => {
+  questionContent.value = [...questionContent.value, result];
+  currentGenerateNumber.value++;
+};
+const onSSEStart = (event: any) => {
+  message.success("开始生成");
+  currentGenerateNumber.value = 0;
+};
+const onSSEClose = (event: any) => {
+  message.success("生成完毕");
+};
 /**
  *提交数据
  */
@@ -155,7 +180,6 @@ const handleNewData = async () => {
     message.error("提交失败，" + res.data.message);
   }
 };
-
 watchEffect(() => {
   loadData();
   loadQuestion();
@@ -169,12 +193,35 @@ watchEffect(() => {
       <a-form-item field="name" label="应用编号">{{ appId }}</a-form-item>
 
       <a-form-item label="题目列表" :content-flex="false" :merge-props="false">
-        <a-button
-          @click="addQuestion(questionContent.length)"
-          size="large"
-          status="warning"
-          >从末尾添加题目
-        </a-button>
+        <a-space size="medium">
+          <a-button
+            @click="addQuestion(questionContent.length)"
+            size="large"
+            status="warning"
+            >从末尾添加题目
+          </a-button>
+          <AIGenerateDrawer
+            :appId="appId"
+            :onSuccess="onAiGenrateQuestion"
+            :onSseSuccess="onAiGenerateSseSuccess"
+            :onSseError="onSSEClose"
+            :onSseStart="onSSEStart"
+            :generate-question-number="generateSchedule"
+          />
+        </a-space>
+        <a-space
+          style="margin-top: 10px"
+          direction="vertical"
+          :style="{ width: '50%' }"
+          v-if="generateQuestionCount != 0"
+        >
+          <a-col>
+            <div>生成进度：</div>
+            <a-progress
+              :percent="currentGenerateNumber / generateQuestionCount"
+            />
+          </a-col>
+        </a-space>
         <div v-for="(question, index) of questionContent" :key="index">
           <a-form-item label="题目编号">{{ index + 1 }}</a-form-item>
           <a-form-item label="应用描述" :key="index">

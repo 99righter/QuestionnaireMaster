@@ -29,10 +29,11 @@
             type="primary"
             v-if="current === questionContent.length"
             circle
+            :loading="submitting"
             :disabled="!currentAnswer"
             @click="doSubmit"
           >
-            查看结果
+            {{ submitting ? "生成结果中" : "一键生成结果" }}
           </a-button>
           <a-button v-if="current > 1" circle @click="current -= 1">
             上一题
@@ -57,7 +58,10 @@ import { useRouter } from "vue-router";
 import { listQuestionVoByPageUsingPost } from "@/api/questionController";
 import message from "@arco-design/web-vue/es/message";
 import { getAppVoByIdUsingGet } from "@/api/appController";
-import { addUserAnswerUsingPost } from "@/api/userAnswerController";
+import {
+  addUserAnswerUsingPost,
+  generateUserAnswerIdUsingGet,
+} from "@/api/userAnswerController";
 
 interface Props {
   appId: string;
@@ -70,7 +74,19 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const router = useRouter();
-
+//获取Id
+const id = ref<number>();
+const LoadId = async () => {
+  const res = await generateUserAnswerIdUsingGet();
+  if (res.data.code === 0) {
+    id.value = res.data.data as any;
+  } else {
+    message.error("获取id失败，" + res.data.message);
+  }
+};
+watchEffect(() => {
+  LoadId();
+});
 const app = ref<API.AppVO>({});
 // 题目内容结构（理解为题目列表）
 const questionContent = ref<API.QuestionContentDTO[]>([]);
@@ -94,7 +110,7 @@ const questionOptions = computed(() => {
 const currentAnswer = ref<string>();
 // 回答列表
 const answerList = reactive<string[]>([]);
-
+const submitting = ref(false);
 /**
  * 加载数据
  */
@@ -155,9 +171,11 @@ const doSubmit = async () => {
   if (!props.appId || !answerList) {
     return;
   }
+  submitting.value = true;
   const res = await addUserAnswerUsingPost({
     appId: props.appId as any,
     choices: answerList,
+    id: id.value,
   });
   if (res.data.code === 0 && res.data.data) {
     console.log("提交成功");
@@ -166,5 +184,6 @@ const doSubmit = async () => {
     console.log("提交失败");
     message.error("提交答案失败，" + res.data.message);
   }
+  submitting.value = false;
 };
 </script>

@@ -76,7 +76,12 @@ const goUserCenter = () => {
 </script>
 
 <template>
-  <a-row id="navigationBar" align="center" :wrap="false">
+  <a-row
+    id="navigationBar"
+    align="center"
+    :wrap="false"
+    style="max-height: 300px"
+  >
     <a-col flex="auto">
       <a-menu
         class="titleInNavigationBar"
@@ -99,7 +104,7 @@ const goUserCenter = () => {
             <a-menu-item :key="route.path">{{ route.name }}</a-menu-item>
           </div>
           <div v-else>
-            <a-sub-menu :key="route.path">
+            <a-sub-menu :key="route.path" :popup-max-height="300">
               <template #title>{{ route.name }}</template>
               <a-menu-item v-for="child in route.children" :key="child.path">
                 {{ child.name }}
@@ -159,5 +164,9 @@ const goUserCenter = () => {
 
 .arco-dropdown-open .arco-icon-down {
   transform: rotate(180deg);
+}
+
+.arco-trigger-menu {
+  max-height: 300px;
 }
 </style>
