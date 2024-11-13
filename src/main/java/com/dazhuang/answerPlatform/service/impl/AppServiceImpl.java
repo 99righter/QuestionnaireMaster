@@ -8,6 +8,9 @@ import com.dazhuang.answerPlatform.common.ErrorCode;
 import com.dazhuang.answerPlatform.constant.CommonConstant;
 import com.dazhuang.answerPlatform.exception.ThrowUtils;
 import com.dazhuang.answerPlatform.mapper.AppMapper;
+import com.dazhuang.answerPlatform.mapper.UserAnswerMapper;
+import com.dazhuang.answerPlatform.model.dto.app.AppAnswerCountDTO;
+import com.dazhuang.answerPlatform.model.dto.app.AppAnswerResultCountDTO;
 import com.dazhuang.answerPlatform.model.dto.app.AppQueryRequest;
 import com.dazhuang.answerPlatform.model.entity.App;
 import com.dazhuang.answerPlatform.model.entity.User;
@@ -29,6 +32,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,12 +50,14 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private UserService userService;
+    @Resource
+    private UserAnswerMapper userAnswerMapper;
 
     /**
      * 校验数据
      *
      * @param app
-     * @param add      对创建的数据进行校验
+     * @param add 对创建的数据进行校验
      */
     @Override
     public void validApp(App app, boolean add) {
@@ -69,20 +75,20 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 创建数据时，参数不能为空
         if (add) {
             // 补充校验规则
-            ThrowUtils.throwIf(StringUtils.isBlank(appName), ErrorCode.PARAMS_ERROR,"应用名称不能为空");
-            ThrowUtils.throwIf(StringUtils.isBlank(appDesc), ErrorCode.PARAMS_ERROR,"应用描述不能为空");
-            ThrowUtils.throwIf(StringUtils.isBlank(appIcon), ErrorCode.PARAMS_ERROR,"应用图标不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appName), ErrorCode.PARAMS_ERROR, "应用名称不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appDesc), ErrorCode.PARAMS_ERROR, "应用描述不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appIcon), ErrorCode.PARAMS_ERROR, "应用图标不能为空");
             AppTypeEnum apptype = AppTypeEnum.getEnumByValue(appType);
-            ThrowUtils.throwIf(apptype ==null,ErrorCode.PARAMS_ERROR,"应用类型不存在");
+            ThrowUtils.throwIf(apptype == null, ErrorCode.PARAMS_ERROR, "应用类型不存在");
             AppScoringStrategyEnum appScoringStrategyEnum = AppScoringStrategyEnum.getEnumByValue(scoringStrategy);
-            ThrowUtils.throwIf(appScoringStrategyEnum == null,ErrorCode.PARAMS_ERROR,"评分策略类型不存在");
+            ThrowUtils.throwIf(appScoringStrategyEnum == null, ErrorCode.PARAMS_ERROR, "评分策略类型不存在");
             ReviewTypeEnum reviewTypeEnum = ReviewTypeEnum.getEnumByValue(reviewStatus);
-            ThrowUtils.throwIf(reviewTypeEnum == null,ErrorCode.PARAMS_ERROR,"审核状态不能为空");
+            ThrowUtils.throwIf(reviewTypeEnum == null, ErrorCode.PARAMS_ERROR, "审核状态不能为空");
             // 当前登录用户
             RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
             User loginUser = userService.getLoginUser(request);
-            ThrowUtils.throwIf(loginUser == null, ErrorCode.PARAMS_ERROR,"用户未登录");
+            ThrowUtils.throwIf(loginUser == null, ErrorCode.PARAMS_ERROR, "用户未登录");
         }
         // 修改数据时，有参数则校验
         //  补充校验规则
@@ -117,7 +123,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         String searchText = appQueryRequest.getSearchText();
         String sortField = appQueryRequest.getSortField();
         String sortOrder = appQueryRequest.getSortOrder();
-
 
 
         // todo 补充需要的查询条件
@@ -256,6 +261,16 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         appVOPage.setRecords(appVOList);
         return appVOPage;
+    }
+
+    @Override
+    public List<AppAnswerCountDTO> getAnswerCountGroupByApp() {
+        return userAnswerMapper.getAnswerGroupByApp();
+    }
+
+    @Override
+    public List<AppAnswerResultCountDTO> getAnswerResultCount(Long appId) {
+        return userAnswerMapper.getAppAnswerResultCountGroupByResult(appId);
     }
 
 }

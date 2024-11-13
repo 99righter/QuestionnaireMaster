@@ -3,11 +3,14 @@ package com.dazhuang.answerPlatform.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dazhuang.answerPlatform.model.dto.app.AppAnswerCountDTO;
+import com.dazhuang.answerPlatform.model.dto.app.AppAnswerResultCountDTO;
 import com.dazhuang.answerPlatform.model.dto.app.AppQueryRequest;
 import com.dazhuang.answerPlatform.model.entity.App;
 import com.dazhuang.answerPlatform.model.vo.AppVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 应用服务
@@ -50,4 +53,13 @@ public interface AppService extends IService<App> {
      * @return
      */
     Page<AppVO> getAppVOPage(Page<App> appPage, HttpServletRequest request);
+    /**
+     * 获取每个题目的答题数量
+     */
+    List<AppAnswerCountDTO> getAnswerCountGroupByApp();
+
+    /**
+     * 获取某个app的答题结果统计
+     */
+    List<AppAnswerResultCountDTO> getAnswerResultCount(Long appId);
 }

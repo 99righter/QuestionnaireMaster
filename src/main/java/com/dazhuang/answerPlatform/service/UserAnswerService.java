@@ -3,11 +3,13 @@ package com.dazhuang.answerPlatform.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dazhuang.answerPlatform.model.dto.app.AppAnswerCountDTO;
 import com.dazhuang.answerPlatform.model.dto.userAnswer.UserAnswerQueryRequest;
 import com.dazhuang.answerPlatform.model.entity.UserAnswer;
 import com.dazhuang.answerPlatform.model.vo.UserAnswerVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 用户答案服务
@@ -50,4 +52,6 @@ public interface UserAnswerService extends IService<UserAnswer> {
      * @return
      */
     Page<UserAnswerVO> getUserAnswerVOPage(Page<UserAnswer> userAnswerPage, HttpServletRequest request);
+
+
 }

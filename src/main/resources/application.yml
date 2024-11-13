@@ -11,7 +11,7 @@ spring:
   # session 配置
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+    store-type: redis
     # 30 天过期
     timeout: 2592000
   # 数据库配置
@@ -25,10 +25,10 @@ spring:
     # todo 需替换配置，然后取消注释
   redis:
     database: 0
-    host: 8.134.252.43
+    host: 172.28.131.94
     port: 6379
     timeout: 5000
-#      password: 123456
+#    password: 123456
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
   #  elasticsearch:
@@ -50,7 +50,7 @@ spring:
       answerPlatformdb:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://localhost:3306/answerPlatformdb
+        jdbc-url: jdbc:mysql://localhost/answerPlatformdb
         username: root
         password: 139258
     # 规则配置
@@ -82,6 +82,10 @@ server:
     session:
       cookie:
         max-age: 2592000
+    # 文件上传大小限制
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -133,3 +137,12 @@ knife4j:
           - com.dazhuang.answerPlatform.controller
 zhipuai:
   apikey: b7f1a144a5e1d96abc14aa53b50e38af.g9xMJGDebPG2KpmI
+#minio配置
+minio:
+  enabled: true
+  host: localhost
+  port: 9000
+  accessKey: minioadmin
+  secretKey: minioadmin191210
+  bucketName: firstbucket
+  url: http://${minio.host}:${minio.port}

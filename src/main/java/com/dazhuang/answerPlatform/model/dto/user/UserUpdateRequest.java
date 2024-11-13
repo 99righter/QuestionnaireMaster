@@ -2,6 +2,7 @@ package com.dazhuang.answerPlatform.model.dto.user;
 
 import java.io.Serializable;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户更新请求

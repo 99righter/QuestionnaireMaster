@@ -8,17 +8,47 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/answerPlatformdb
+    url: jdbc:mysql://8.134.252.43:3306/answerPlatformdb
     username: root
     password: 139258
   # Redis 配置
+  redis:
+    database: 0
+    host: 8.134.252.43
+    port: 6379
+    timeout: 5000
   # todo 需替换配置
-#  redis:
-#    database: 1
-#    host: localhost
-#    port: 6379
-#    timeout: 5000
-#    password: 123456
+  shardingsphere:
+    #数据源配置
+    datasource:
+      # 多数据源以逗号隔开即可
+      names: answerPlatformdb
+      answerPlatformdb:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/answerPlatformdb
+        username: root
+        password: 139258
+    # 规则配置
+    rules:
+      sharding:
+        # 分片算法配置
+        sharding-algorithms:
+          # 自定义分片规则名
+          answer-table-inline:
+            ## inline 类型是简单的配置文件里面就能写的类型，其他还有自定义类等等
+            type: INLINE
+            props:
+              algorithm-expression: user_answer_$->{appId % 2}
+        tables:
+          user_answer:
+            actual-data-nodes: answerPlatformdb.user_answer_$->{0..1}
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: appId
+                sharding-algorithm-name: answer-table-inline
+
 #  # Elasticsearch 配置
 #  # todo 需替换配置
 #  elasticsearch:
@@ -35,3 +65,5 @@ knife4j:
     enable: true
     username: root
     password: 123456
+zhipuai:
+  apikey: b7f1a144a5e1d96abc14aa53b50e38af.g9xMJGDebPG2KpmI

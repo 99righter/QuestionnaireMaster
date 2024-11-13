@@ -51,6 +51,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Long> addApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         //  在此处将实体类和 DTO 进行转换
@@ -62,7 +63,7 @@ public class AppController {
         User loginUser = userService.getLoginUser(request);
         app.setUserId(loginUser.getId());
         app.setReviewStatus(ReviewTypeEnum.REVIEWING.getValue());
-    // 写入数据库
+        // 写入数据库
         boolean result = appService.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         // 返回新写入的数据 id
@@ -78,6 +79,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteApp(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -165,7 +167,7 @@ public class AppController {
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<AppVO>> listAppVOByPage(@RequestBody AppQueryRequest appQueryRequest,
-                                                               HttpServletRequest request) {
+                                                     HttpServletRequest request) {
         long current = appQueryRequest.getCurrent();
         long size = appQueryRequest.getPageSize();
         // 限制爬虫
@@ -185,8 +187,9 @@ public class AppController {
      * @return
      */
     @PostMapping("/my/list/page/vo")
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Page<AppVO>> listMyAppVOByPage(@RequestBody AppQueryRequest appQueryRequest,
-                                                                 HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 补充查询条件，只查询当前登录用户的数据
         User loginUser = userService.getLoginUser(request);
@@ -210,6 +213,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/edit")
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Boolean> editApp(@RequestBody AppEditRequest appEditRequest, HttpServletRequest request) {
         if (appEditRequest == null || appEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -240,26 +244,27 @@ public class AppController {
 
     /**
      * 管理员审核
+     *
      * @param reviewRequest 审核参数
-     * @param request 当前登录用户信息
+     * @param request       当前登录用户信息
      * @return 是否成功删除
      */
     @PostMapping("/review")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> doAppReview(@RequestBody ReviewRequest reviewRequest,HttpServletRequest request){
-        ThrowUtils.throwIf(reviewRequest ==null,ErrorCode.PARAMS_ERROR,"请求参数为空");
+    public BaseResponse<Boolean> doAppReview(@RequestBody ReviewRequest reviewRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(reviewRequest == null, ErrorCode.PARAMS_ERROR, "请求参数为空");
         Long id = reviewRequest.getId();
         Integer reviewStatus = reviewRequest.getReviewStatus();
         ReviewTypeEnum reviewTypeEnum = ReviewTypeEnum.getEnumByValue(reviewStatus);
-        if(id ==null || reviewTypeEnum ==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"审核状态不存在");
+        if (id == null || reviewTypeEnum == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "审核状态不存在");
         }
         //判断App是否存在
         App olderApp = appService.getById(id);
-        ThrowUtils.throwIf(olderApp == null,ErrorCode.NOT_FOUND_ERROR,"待审核应用不存在");
+        ThrowUtils.throwIf(olderApp == null, ErrorCode.NOT_FOUND_ERROR, "待审核应用不存在");
         //如果未改变状态
-        if(olderApp.getReviewStatus().equals(reviewStatus) ){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请勿重复审核");
+        if (olderApp.getReviewStatus().equals(reviewStatus)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请勿重复审核");
         }
         //更新审核状态
         User loginUser = userService.getLoginUser(request);
@@ -269,7 +274,7 @@ public class AppController {
         app.setReviewerId(loginUser.getId());
         app.setReviewTime(new Date());
         boolean result = appService.updateById(app);
-        ThrowUtils.throwIf(!result,ErrorCode.OPERATION_ERROR,"审核操作失败");
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "审核操作失败");
         return ResultUtils.success(true);
 
     }
