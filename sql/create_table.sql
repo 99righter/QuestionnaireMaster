@@ -1,6 +1,5 @@
 # 数据库初始化
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
-# @from <a href="https://yupi.icu">编程导航知识星球</a>
+
 
 -- 创建库
 create database if not exists ;
@@ -26,14 +25,14 @@ create table if not exists user
     index idx_unionId (unionId)
 ) comment '用户' collate = utf8mb4_unicode_ci;
 
--- 应用表
+-- 问卷表
 create table if not exists app
 (
     id              bigint auto_increment comment 'id' primary key,
-    appName         varchar(128)                       not null comment '应用名',
-    appDesc         varchar(2048)                      null comment '应用描述',
-    appIcon         varchar(1024)                      null comment '应用图标',
-    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-测评类）',
+    appName         varchar(128)                       not null comment '问卷名',
+    appDesc         varchar(2048)                      null comment '问卷描述',
+    appIcon         varchar(1024)                      null comment '问卷图标',
+    appType         tinyint  default 0                 not null comment '问卷类型（0-得分类，1-测评类）',
     scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
     reviewStatus    int      default 0                 not null comment '审核状态：0-待审核, 1-通过, 2-拒绝',
     reviewMessage   varchar(512)                       null comment '审核信息',
@@ -44,14 +43,14 @@ create table if not exists app
     updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete        tinyint  default 0                 not null comment '是否删除',
     index idx_appName (appName)
-) comment '应用' collate = utf8mb4_unicode_ci;
+) comment '问卷' collate = utf8mb4_unicode_ci;
 
 -- 题目表
 create table if not exists question
 (
     id              bigint auto_increment comment 'id' primary key,
     questionContent text                               null comment '题目内容（json格式）',
-    appId           bigint                             not null comment '应用 id',
+    appId           bigint                             not null comment '问卷 id',
     userId          bigint                             not null comment '创建用户 id',
     createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
@@ -68,7 +67,7 @@ create table if not exists scoring_result
     resultPicture    varchar(1024)                      null comment '结果图片',
     resultProp       varchar(128)                       null comment '结果属性集合 JSON，如 [I,S,T,J]',
     resultScoreRange int                                null comment '结果得分范围，如 80，表示 80及以上的分数命中此结果',
-    appId            bigint                             not null comment '应用 id',
+    appId            bigint                             not null comment '问卷 id',
     userId           bigint                             not null comment '创建用户 id',
     createTime       datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime       datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
@@ -80,8 +79,8 @@ create table if not exists scoring_result
 create table if not exists user_answer
 (
     id              bigint auto_increment primary key,
-    appId           bigint                             not null comment '应用 id',
-    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    appId           bigint                             not null comment '问卷 id',
+    appType         tinyint  default 0                 not null comment '问卷类型（0-得分类，1-角色测评类）',
     scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
     choices         text                               null comment '用户答案（JSON 数组）',
     resultId        bigint                             null comment '评分结果 id',
@@ -101,8 +100,8 @@ create table if not exists user_answer
 create table if not exists user_answer_0
 (
     id              bigint auto_increment primary key,
-    appId           bigint                             not null comment '应用 id',
-    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    appId           bigint                             not null comment '问卷 id',
+    appType         tinyint  default 0                 not null comment '问卷类型（0-得分类，1-角色测评类）',
     scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
     choices         text                               null comment '用户答案（JSON 数组）',
     resultId        bigint                             null comment '评分结果 id',
@@ -122,8 +121,8 @@ create table if not exists user_answer_0
 create table if not exists user_answer_1
 (
     id              bigint auto_increment primary key,
-    appId           bigint                             not null comment '应用 id',
-    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    appId           bigint                             not null comment '问卷 id',
+    appType         tinyint  default 0                 not null comment '问卷类型（0-得分类，1-角色测评类）',
     scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
     choices         text                               null comment '用户答案（JSON 数组）',
     resultId        bigint                             null comment '评分结果 id',

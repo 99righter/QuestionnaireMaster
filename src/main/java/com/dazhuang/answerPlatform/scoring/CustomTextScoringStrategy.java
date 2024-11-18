@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 自定义测评类应用
- * 应用类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
+ * 自定义测评类问卷
+ * 问卷类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
  */
 @ScoringStrategyConfig(appType = 1,scoringStrategy = 0)
 public class CustomTextScoringStrategy implements ScoringStrategy{

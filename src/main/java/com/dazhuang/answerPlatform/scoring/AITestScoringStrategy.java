@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * AI测评类应用评价
- * 应用类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
+ * AI测评类问卷评价
+ * 问卷类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
  */
 @ScoringStrategyConfig(appType = 1, scoringStrategy = 1)
 public class AITestScoringStrategy implements ScoringStrategy {
@@ -111,7 +111,7 @@ public class AITestScoringStrategy implements ScoringStrategy {
     /**
      * 创建用户选项消息队列
      *
-     * @param app                 答题应用
+     * @param app                 答题问卷
      * @param questionContentDTOS 题目描述
      * @param choices             用户选项
      * @return

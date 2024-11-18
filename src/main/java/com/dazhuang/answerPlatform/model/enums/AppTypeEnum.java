@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 应用类型枚举
+ * 问卷类型枚举
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+
+
  */
 public enum AppTypeEnum {
 

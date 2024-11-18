@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Component
 public @interface ScoringStrategyConfig {
     /**
-     *应用类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
+     *问卷类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
      * @return
      */
     int appType();

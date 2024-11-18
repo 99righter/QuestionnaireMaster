@@ -25,7 +25,7 @@ public class Question implements Serializable {
     private String questionContent;
 
     /**
-     * 应用 id
+     * 问卷 id
      */
     private Long appId;
 

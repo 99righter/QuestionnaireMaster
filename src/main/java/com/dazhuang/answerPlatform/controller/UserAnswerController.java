@@ -36,8 +36,7 @@ import java.util.List;
 /**
  * 用户答案接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
+
  */
 @RestController
 @RequestMapping("/userAnswer")
@@ -80,7 +79,7 @@ public class UserAnswerController {
         //判断app是否存在
         App app = appService.getById(userAnswerAddRequest.getAppId());
         if (app == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "问卷不存在");
         }
         //  填充默认值
         User loginUser = userService.getLoginUser(request);

@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * 题目接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
@@ -70,7 +70,7 @@ public class QuestionController {
         //  填充默认值
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
-        // 填充应用id
+        // 填充问卷id
         List<QuestionContentDTO> questionContent = questionAddRequest.getQuestionContent();
         Long appId = questionAddRequest.getAppId();
         question.setAppId(appId);
@@ -274,7 +274,7 @@ public class QuestionController {
         Integer questionNum = aiGenerateRequest.getQuestionNum();
         Integer optionNum = aiGenerateRequest.getOptionNum();
         App app = appService.getById(appId);
-        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "问卷不存在");
         //调用接口生成
         List<QuestionContentDTO> questionContentDTOList = questionService.getAIGenerateQuestion(app, questionNum, optionNum);
         return ResultUtils.success(questionContentDTOList);

@@ -25,9 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
- * 应用接口
+ * 问卷接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ 
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
@@ -44,7 +44,7 @@ public class AppController {
     // region 增删改查
 
     /**
-     * 创建应用
+     * 创建问卷
      *
      * @param appAddRequest
      * @param request
@@ -72,7 +72,7 @@ public class AppController {
     }
 
     /**
-     * 删除应用
+     * 删除问卷
      *
      * @param deleteRequest
      * @param request
@@ -100,7 +100,7 @@ public class AppController {
     }
 
     /**
-     * 更新应用（仅管理员可用）
+     * 更新问卷（仅管理员可用）
      *
      * @param appUpdateRequest
      * @return

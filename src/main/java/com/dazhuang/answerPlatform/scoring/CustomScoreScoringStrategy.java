@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 自定义打分雷应用
- * 应用类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
+ * 自定义打分雷问卷
+ * 问卷类型（0-得分类，1-角色测评类）'  评分策略（0-自定义，1-AI）
  */
 @ScoringStrategyConfig(appType = 0, scoringStrategy = 0)
 public class CustomScoreScoringStrategy implements ScoringStrategy {

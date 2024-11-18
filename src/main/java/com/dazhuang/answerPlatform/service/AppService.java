@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * 应用服务
+ * 问卷服务
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 public interface AppService extends IService<App> {
@@ -37,7 +37,7 @@ public interface AppService extends IService<App> {
     QueryWrapper<App> getQueryWrapper(AppQueryRequest appQueryRequest);
     
     /**
-     * 获取应用封装
+     * 获取问卷封装
      *
      * @param app
      * @param request
@@ -46,7 +46,7 @@ public interface AppService extends IService<App> {
     AppVO getAppVO(App app, HttpServletRequest request);
 
     /**
-     * 分页获取应用封装
+     * 分页获取问卷封装
      *
      * @param appPage
      * @param request

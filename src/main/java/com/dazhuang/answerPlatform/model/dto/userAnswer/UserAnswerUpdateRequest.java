@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 更新用户答案请求
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ 
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Data
@@ -19,7 +19,7 @@ public class UserAnswerUpdateRequest implements Serializable {
      */
     private Long id;
     /**
-     * 应用 id
+     * 问卷 id
      */
     private Long appId;
 

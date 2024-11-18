@@ -12,9 +12,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 应用视图
+ * 问卷视图
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ 
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Data
@@ -25,22 +25,22 @@ public class AppVO implements Serializable {
     private Long id;
 
     /**
-     * 应用名
+     * 问卷名
      */
     private String appName;
 
     /**
-     * 应用描述
+     * 问卷描述
      */
     private String appDesc;
 
     /**
-     * 应用图标
+     * 问卷图标
      */
     private String appIcon;
 
     /**
-     * 应用类型（0-得分类，1-测评类）
+     * 问卷类型（0-得分类，1-测评类）
      */
     private Integer appType;
 

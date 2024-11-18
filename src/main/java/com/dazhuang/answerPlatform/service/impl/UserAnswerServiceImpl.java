@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * 用户答案服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ 
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Service
@@ -70,9 +70,9 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         if (add) {
             // todo 补充校验规则
             ThrowUtils.throwIf(ObjectUtils.isEmpty(id),ErrorCode.PARAMS_ERROR,"用户答案编号为空");
-            ThrowUtils.throwIf(ObjectUtils.isEmpty(appId),ErrorCode.PARAMS_ERROR,"应用编号为空");
+            ThrowUtils.throwIf(ObjectUtils.isEmpty(appId),ErrorCode.PARAMS_ERROR,"问卷编号为空");
 //            AppTypeEnum appTypeEnum  = AppTypeEnum.getEnumByValue(appType);
-//            ThrowUtils.throwIf(appTypeEnum == null, ErrorCode.PARAMS_ERROR,"应用类型不存在");
+//            ThrowUtils.throwIf(appTypeEnum == null, ErrorCode.PARAMS_ERROR,"问卷类型不存在");
 //            AppScoringStrategyEnum appScoringStrategyEnum = AppScoringStrategyEnum.getEnumByValue(scoringStrategy);
 //            ThrowUtils.throwIf(appScoringStrategyEnum == null,ErrorCode.PARAMS_ERROR,"评分类型不存在");
             ThrowUtils.throwIf(StringUtils.isBlank(choices),ErrorCode.PARAMS_ERROR,"用户答案为空");

@@ -20,12 +20,12 @@ public class UserAnswer implements Serializable {
     private Long id;
 
     /**
-     * 应用 id
+     * 问卷 id
      */
     private Long appId;
 
     /**
-     * 应用类型（0-得分类，1-角色测评类）
+     * 问卷类型（0-得分类，1-角色测评类）
      */
     private Integer appType;
 

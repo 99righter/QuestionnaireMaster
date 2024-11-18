@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * 答题结果服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ 
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Service
@@ -71,7 +71,7 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
         // 补充校验规则
         if (appId != null) {
             App app = appService.getById(appId);
-            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "应用不存在");
+            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "问卷不存在");
         }
     }
 

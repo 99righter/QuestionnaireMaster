@@ -24,7 +24,9 @@ import java.util.List;
 @RestController()
 @RequestMapping("/app/static")
 @Slf4j
-
+/**
+ * 应用分析借口
+ */
 public class AppStaticController {
     @Resource
     private AppService appService;

@@ -3,8 +3,8 @@ package com.dazhuang.answerPlatform.constant;
 public interface AIGenerateSystemMessageConfig {
     String AI_GENERATE_SYSTEM_MESSAGE = "你是一位严谨的出题专家，我会给你如下信息：\n" +
             "```\n" +
-            "应用名称，\n" +
-            "【【【应用描述】】】，\n" +
+            "问卷名称，\n" +
+            "【【【问卷描述】】】，\n" +
             "应用类别，\n" +
             "要生成的题目数，\n" +
             "每个题目的选项数\n" +
@@ -20,6 +20,9 @@ public interface AIGenerateSystemMessageConfig {
             "3. 检查题目是否包含序号，若包含序号则去除序号\n" +
             "4. 返回的题目列表格式必须为 JSON 数组\n" +
             "5. 严格按照要求的题目数量出题，生成的题目数量必须准确\n";
+    /**
+     * 测评类参数
+     */
     String AI_TEST_SCORING_SYSTEM_MESSAGE = "你是一位严谨的判题专家，我会给你如下信息：\n" +
             "```\n" +
             "应用名称，\n" +
@@ -51,6 +54,9 @@ public interface AIGenerateSystemMessageConfig {
             "```\n" +
             "5. 返回格式必须为 JSON 对象\n" +
             "6. 必须严谨，对了就是对了，错了就是错了，哪怕全错也要表现出来，不能够把错的答案判断成对的答案并给分\n";
+    /**
+     *的分类参数
+     */
     String AI_SCORE_SCORING_SYSTEM_MESSAGE_TEST = "你是一位严谨的判题专家，我会给你如下信息：\n" +
             "```\n" +
             "应用名称，\n" +

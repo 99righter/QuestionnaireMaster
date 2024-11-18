@@ -39,9 +39,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 应用服务实现
+ * 问卷服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Service
@@ -68,18 +68,18 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         String appIcon = app.getAppIcon();
         Integer appType = app.getAppType();
         Integer scoringStrategy = app.getScoringStrategy();
-        //用户刚开始创建的应用的审核状态都是待审核，为默认字段
+        //用户刚开始创建的问卷的审核状态都是待审核，为默认字段
         Integer reviewStatus = ReviewTypeEnum.REVIEWING.getValue();
         Long userId = app.getUserId();
 
         // 创建数据时，参数不能为空
         if (add) {
             // 补充校验规则
-            ThrowUtils.throwIf(StringUtils.isBlank(appName), ErrorCode.PARAMS_ERROR, "应用名称不能为空");
-            ThrowUtils.throwIf(StringUtils.isBlank(appDesc), ErrorCode.PARAMS_ERROR, "应用描述不能为空");
-            ThrowUtils.throwIf(StringUtils.isBlank(appIcon), ErrorCode.PARAMS_ERROR, "应用图标不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appName), ErrorCode.PARAMS_ERROR, "问卷名称不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appDesc), ErrorCode.PARAMS_ERROR, "问卷描述不能为空");
+            ThrowUtils.throwIf(StringUtils.isBlank(appIcon), ErrorCode.PARAMS_ERROR, "问卷图标不能为空");
             AppTypeEnum apptype = AppTypeEnum.getEnumByValue(appType);
-            ThrowUtils.throwIf(apptype == null, ErrorCode.PARAMS_ERROR, "应用类型不存在");
+            ThrowUtils.throwIf(apptype == null, ErrorCode.PARAMS_ERROR, "问卷类型不存在");
             AppScoringStrategyEnum appScoringStrategyEnum = AppScoringStrategyEnum.getEnumByValue(scoringStrategy);
             ThrowUtils.throwIf(appScoringStrategyEnum == null, ErrorCode.PARAMS_ERROR, "评分策略类型不存在");
             ReviewTypeEnum reviewTypeEnum = ReviewTypeEnum.getEnumByValue(reviewStatus);
@@ -93,7 +93,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 修改数据时，有参数则校验
         //  补充校验规则
         if (StringUtils.isNotBlank(appName)) {
-            ThrowUtils.throwIf(appName.length() > 80, ErrorCode.PARAMS_ERROR, "应用名称过长");
+            ThrowUtils.throwIf(appName.length() > 80, ErrorCode.PARAMS_ERROR, "问卷名称过长");
         }
 
     }
@@ -158,7 +158,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     }
 
     /**
-     * 获取应用封装
+     * 获取问卷封装
      *
      * @param app
      * @param request

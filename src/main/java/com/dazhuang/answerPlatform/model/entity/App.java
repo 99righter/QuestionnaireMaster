@@ -7,7 +7,7 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 应用
+ * 问卷
  * @TableName app
  */
 @TableName(value ="app")
@@ -20,22 +20,22 @@ public class App implements Serializable {
     private Long id;
 
     /**
-     * 应用名
+     * 问卷名
      */
     private String appName;
 
     /**
-     * 应用描述
+     * 问卷描述
      */
     private String appDesc;
 
     /**
-     * 应用图标
+     * 问卷图标
      */
     private String appIcon;
 
     /**
-     * 应用类型（0-得分类，1-测评类）
+     * 问卷类型（0-得分类，1-测评类）
      */
     private Integer appType;
 

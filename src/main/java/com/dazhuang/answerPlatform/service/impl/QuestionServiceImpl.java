@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  * 题目服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Service
@@ -84,7 +84,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             ThrowUtils.throwIf(StringUtils.isBlank(questionContent), ErrorCode.PARAMS_ERROR, "问题为空");
             App app = new App();
             app = appService.getById(appId);
-            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "应用不存在");
+            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "问卷不存在");
 //            User user = userService.getById(userId);
 //            ThrowUtils.throwIf(user == null,ErrorCode.PARAMS_ERROR,"用户不存在");
 

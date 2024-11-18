@@ -45,7 +45,7 @@ public class ScoringResult implements Serializable {
     private Integer resultScoreRange;
 
     /**
-     * 应用 id
+     * 问卷 id
      */
     private Long appId;
 
