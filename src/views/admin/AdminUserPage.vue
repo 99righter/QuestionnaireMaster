@@ -79,7 +79,11 @@
         </a-form-item>
         <a-form-item field="userAvatar" label="头像">
           <!--          todo-->
-          <a>图片上传预留</a>
+          <PictureUpload
+            :onChange="getUserAvatarUrl"
+            :imageUrl="formEditUserParams.userAvatar"
+          />
+          {{ formEditUserParams.userAvatar }}
         </a-form-item>
         <a-form-item field="userRole" label="用户权限">
           <a-input
@@ -89,8 +93,8 @@
         </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit" style="width: 100px"
-            >提交</a-button
-          >
+            >提交
+          </a-button>
         </a-form-item>
       </a-form>
     </div>
@@ -111,26 +115,10 @@ import PictureUpload from "@/components/PictureUpload.vue";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dayjs = require("dayjs");
-const selectedKeys = ref(["Jane Doe", "Alisa Ross"]);
-const rowSelection = reactive({
-  type: "checkbox",
-  showCheckedAll: true,
-  onlyCurrent: false,
-});
-/*
-  type UserQueryRequest = {
-    current?: number;
-    id?: number;
-    mpOpenId?: string;
-    pageSize?: number;
-    sortField?: string;
-    sortOrder?: string;
-    unionId?: string;
-    userName?: string;
-    userProfile?: string;
-    userRole?: string;
-  };
- */
+const userAvatarUrl = ref<string>("");
+const getUserAvatarUrl = (url: any) => {
+  userAvatarUrl.value = url;
+};
 //定义来自搜索用户的信息
 const formSearchUserParams = ref<API.UserQueryRequest>({});
 //初始化搜索条件
@@ -150,9 +138,9 @@ const total = ref<number>(0);
  */
 const lodData = async () => {
   if (!searchParams.value.userName || searchParams.value.userName === "") {
-    console.log("加载数据时搜索条件为空");
+    // console.log("加载数据时搜索条件为空");
   }
-  console.log("加载数据的条件：" + searchParams.value.userName);
+  // console.log("加载数据的条件：" + searchParams.value.userName);
   const res = await listUserByPageUsingPost(searchParams.value);
   if (res.data.code === 0) {
     dataList.value = res.data.data?.records || [];
@@ -249,17 +237,15 @@ const loadEditUser = async (record: API.User) => {
   if (!record.id) {
     return;
   }
-  const res = await getUserByIdUsingGet({
-    id: record.id,
-  });
-  if (res.data.code === 0) {
-    editUser.value = {
-      ...res.data.data,
-    };
-    openDrawer();
-  } else {
-    message.error("获取用户信息失败" + res.data.message);
-  }
+  userAvatarUrl.value = "";
+  // const res = await getUserByIdUsingGet({
+  //   id: record.id,
+  // });
+  // console.log("加载编辑用户" + userAvatarUrl.value);
+  editUser.value = {
+    ...record,
+  };
+  openDrawer();
 };
 
 //编辑用户输入的信息
@@ -270,20 +256,28 @@ const EditUserToNewUser = () => {
   //   ...editUser.value,
   // };
   formEditUserParams.value.id = editUser.value.id;
-  console.log(
-    "将编辑用户的信息传给新用户" + formEditUserParams.value.userProfile
-  );
+  if (userAvatarUrl.value !== "" && userAvatarUrl.value !== undefined) {
+    formEditUserParams.value.userAvatar = userAvatarUrl.value;
+  } else {
+    formEditUserParams.value.userAvatar = editUser.value.userAvatar;
+  }
+  // console.log(
+  //   "将编辑用户的信息传给新用户" + formEditUserParams.value.userProfile
+  // );
 };
 const doEdit = async () => {
   EditUserToNewUser();
+  // console.log("userAvatarUrl.value：" + userAvatarUrl.value);
   const res = await updateUserUsingPost({ ...formEditUserParams.value });
   if (res.data.code === 0) {
     // handleOk();
-    // lodData();
-    console.log("编辑成功" + res.data.message);
+    lodData();
+    //提交后需要注意将userAvatarUrl.value置空
+    // console.log("编辑成功" + res.data.message);
   } else {
     message.error("编辑失败" + res.data.message);
   }
+  formEditUserParams.value.userAvatar = "";
 };
 // 表格列配置
 const columns = [

@@ -1,7 +1,21 @@
 <template>
+  <h2>当前应用id:{{ id }}</h2>
+  <div class="inputScoringResultModal">
+    <a-button @click="handleClick">创建一条新的评分结果</a-button>
+    <a-modal
+      v-model:visible="visible"
+      title="评分结果"
+      @before-ok="handleBeforeOk"
+      hide-cancel
+      ok-text="取消"
+    >
+      <EditOrAddScoringResult/>
+      <!--        {{ formScori ngResult.resultPicture }}-->
+    </a-modal>
+  </div>
   <a-form
     :model="formSearchParams"
-    :style="{ marginBottom: '20px' }"
+    :style="{ marginBottom: '20px', marginTop: '20px' }"
     layout="inline"
     @submit="doSearch"
   >
@@ -50,10 +64,22 @@
     <template #optional="{ record }">
       <a-space>
         <a-button status="danger" @click="doDelete(record)">删除</a-button>
-        <a-button status="normal" @click="doUpdate?.(record)">修改</a-button>
+        <a-button status="normal" @click="doUpdateScoringResult(record)"
+          >修改
+        </a-button>
       </a-space>
     </template>
   </a-table>
+  <a-modal
+    v-model:visible="updateVisable"
+    title="评分结果"
+    @before-ok="handleBeforeOk"
+    hide-cancel
+    ok-text="取消"
+  >
+    <EditOrAddScoringResult :doScoringResultUpdate="updateScoringResultParam" />
+    <!--        {{ formScoringResult.resultPicture }}-->
+  </a-modal>
 </template>
 
 <script setup lang="ts">
@@ -65,14 +91,15 @@ import {
 import API from "@/api";
 import message from "@arco-design/web-vue/es/message";
 import { dayjs } from "@arco-design/web-vue/es/_utils/date";
+import EditOrAddScoringResult from "@/components/EditOrAddScoringResult.vue";
 
 interface Props {
-  appId: string;
-  doUpdate: (scoringResult: API.ScoringResultVO) => void;
+  id: string;
+  // doUpdate: (scoringResult: API.ScoringResultVO) => void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  appId: () => {
+  id: () => {
     return "";
   },
 });
@@ -85,7 +112,64 @@ const initSearchParams = {
   sortField: "createTime",
   sortOrder: "descend",
 };
-
+//更新变量
+const updateVisable = ref(false);
+/**
+ * 定义传递参数变量
+ */
+const updateScoringResultParam = ref<API.ScoringResultVO>({
+  id: 0,
+  resultDesc: "",
+  resultName: "",
+  resultPicture: "",
+});
+/**
+ * 点击修改按钮事件
+ */
+const doUpdateScoringResult = (record: API.ScoringResult) => {
+  updateVisable.value = true;
+  updateId.value = record.id;
+  imageUrl.value = record.resultPicture as any;
+  updateScoringResultParam.value = record as any;
+};
+const visible = ref(false);
+/*const doUpdate = (record: API.ScoringResult) => {
+  // console.log("执行更新方法");
+  updateVisable.value = true;
+  updateId.value = record.id;
+  imageUrl.value = record.resultPicture as any;
+  formScoringResult.value = {
+    ...record,
+  };
+  console.log(
+    "formScoringResult.value:" + JSON.stringify(formScoringResult.value)
+  );
+};*/
+const intiScoringResult = {
+  resultDesc: "",
+  resultName: "",
+  resultPicture: "",
+};
+const formScoringResult = ref({
+  resultDesc: "",
+  resultName: "",
+  resultPicture: "",
+} as API.ScoringResultAddRequest);
+const handleClick = () => {
+  //如果是添加的话就需要初始化formScoringResult;
+  formScoringResult.value = {};
+  visible.value = true;
+};
+const updateId = ref<any>();
+const imageUrl = ref("");
+const handleBeforeOk = async () => {
+  console.log("执行了打开弹窗方法");
+  formScoringResult.value = {
+    ...intiScoringResult,
+  };
+  console.log("是否为更新方法" + updateId.value);
+  visible.value = false;
+};
 const searchParams = ref<API.ScoringResultQueryRequest>({
   ...initSearchParams,
 });
@@ -96,12 +180,12 @@ const total = ref<number>(0);
  * 加载数据
  */
 const loadData = async () => {
-  if (!props.appId) {
+  if (!props.id) {
     return;
   }
   const params = {
     ...searchParams.value,
-    appId: props.appId as any,
+    appId: props.id as any,
   };
   const res = await listScoringResultByPageUsingPost(params);
   if (res.data.code === 0) {

@@ -2,7 +2,8 @@
   <a-card class="appCard" hoverable @click="doCardClick">
     <template #actions>
       <!--      <span class="icon-hover"> <IconThumbUp /> </span>-->
-      <span class="icon-hover"> <IconShareInternal /> </span>
+      <span class="icon-hover" @click="doShare"> <IconShareInternal /> </span>
+      <ShareCompent ref="shareModel" :link="shareLink" />
     </template>
     <template #cover>
       <div
@@ -40,8 +41,9 @@
 <script setup lang="ts">
 import { IconShareInternal } from "@arco-design/web-vue/es/icon";
 import API from "@/api";
-import { defineProps, withDefaults } from "vue";
+import { defineProps, ref, withDefaults } from "vue";
 import { useRouter } from "vue-router";
+import ShareCompent from "@/components/ShareCompent.vue";
 
 /**
  * 定义一个接口类型，里面的数据为app，类型为AppVO
@@ -64,6 +66,18 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter();
 const doCardClick = () => {
   router.push(`/app/detail/${props.app.id}`);
+};
+const shareModel = ref();
+const shareLink = `${window.location.protocol}//${window.location.host}/app/detail/${props.app.id}`;
+
+/**
+ * 分享方法
+ */
+const doShare = (e: Event) => {
+  if (shareModel.value) {
+    shareModel.value.handleClick();
+  }
+  e.stopPropagation();
 };
 </script>
 <style scoped>

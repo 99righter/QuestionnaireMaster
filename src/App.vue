@@ -17,11 +17,6 @@
 <script setup lang="ts">
 import BasicLayout from "@/layouts/BasicLayout.vue";
 import { useRoute } from "vue-router";
-import { getLoginUserUsingGet } from "@/api/userController";
 
 const route = useRoute();
-
-getLoginUserUsingGet().then((res) => {
-  console.log(res);
-});
 </script>

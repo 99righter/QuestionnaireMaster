@@ -17,7 +17,7 @@
             class="arco-upload-list-picture custom-upload-avatar"
             v-if="file && file.url"
           >
-            <img :src="file.url" :key="randomKey" />
+            <img :src="file.url" />
             <div class="arco-upload-list-picture-mask">
               <IconEdit />
             </div>
@@ -34,7 +34,30 @@
               }"
             />
           </div>
+          <!--          <div-->
+          <!--            class="arco-upload-list-picture custom-upload-avatar"-->
+          <!--            v-else-if="!file && !file.url && props.imageUrl"-->
+          <!--          >-->
+          <!--            <img :src="props.imageUrl" />-->
+          <!--            <div class="arco-upload-list-picture-mask">-->
+          <!--              <IconEdit />-->
+          <!--            </div>-->
+          <!--            &lt;!&ndash;            <a-progress&ndash;&gt;-->
+          <!--            &lt;!&ndash;              v-if="file.status === 'uploading' && file.percent < 100"&ndash;&gt;-->
+          <!--            &lt;!&ndash;              :percent="file.percent"&ndash;&gt;-->
+          <!--            &lt;!&ndash;              type="circle"&ndash;&gt;-->
+          <!--            &lt;!&ndash;              size="mini"&ndash;&gt;-->
+          <!--            &lt;!&ndash;              :style="{&ndash;&gt;-->
+          <!--            &lt;!&ndash;                position: 'absolute',&ndash;&gt;-->
+          <!--            &lt;!&ndash;                left: '50%',&ndash;&gt;-->
+          <!--            &lt;!&ndash;                top: '50%',&ndash;&gt;-->
+          <!--            &lt;!&ndash;                transform: 'translateX(-50%) translateY(-50%)',&ndash;&gt;-->
+          <!--            &lt;!&ndash;              }"&ndash;&gt;-->
+          <!--            &lt;!&ndash;            />&ndash;&gt;-->
+          <!--          </div>-->
           <div class="arco-upload-picture-card" v-else>
+            <!--            <img :src="props.imageUrl" />-->
+
             <div class="arco-upload-picture-card-text">
               <IconPlus />
               <div style="margin-top: 10px; font-weight: 600">上传</div>
@@ -48,7 +71,7 @@
 
 <script setup lang="ts">
 import { IconEdit, IconPlus } from "@arco-design/web-vue/es/icon";
-import { defineProps, ref, watch, withDefaults } from "vue";
+import { defineProps, ref, withDefaults } from "vue";
 import { uploadFileUsingPost } from "@/api/fileController";
 import { Message } from "@arco-design/web-vue";
 
@@ -71,31 +94,27 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const file = ref();
-const randomKey = ref(Math.random());
+// if (props.value) {
+//   file.value = {
+//     url: props.imageUrl,
+//     percent: 100,
+//     status: "done",
+//   };
+// }
+// if (props.imageUrl && !props.value) {
+//   file.value = {
+//     url: props.imageUrl,
+//     percent: 100,
+//     status: "done",
+//   };
+// }
 if (props.value) {
   file.value = {
     url: props.value,
     percent: 100,
     status: "done",
   };
-  console.log("提交了图片，修改file.url的值");
 }
-
-watch(props, (newValue) => {
-  if (props.imageUrl) {
-    file.value = {
-      url: props.imageUrl,
-      percent: 100,
-      status: "done",
-    };
-    console.log("传来了图片，初始化file.url的值");
-  }
-  if (file.value) {
-    file.value.url = props.imageUrl;
-    console.log("图片链接的值为：" + file.value.url);
-  }
-  console.log("imageUrl变化了");
-});
 
 // 自定义请求
 const customRequest = async (option: any) => {
@@ -110,9 +129,14 @@ const customRequest = async (option: any) => {
       file: fileItem.file,
       url,
     };
-    console.log("上传成功，修改file.url的值");
     props.onChange?.(url);
+    // // file.value.url = "";
+    // if (props.imageUrl) {
+    //   file.value.url = props.imageUrl;
+    // }
     onSuccess();
+    // console.log(file.value);
+    // console.log("链接为" + url);
   } else {
     Message.error("上传失败，" + res.data.message || "");
     onError(new Error(res.data.message));

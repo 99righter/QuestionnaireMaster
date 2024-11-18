@@ -14,7 +14,7 @@
           <a-input v-model="form.appDesc" placeholder="请输入你的应用描述" />
         </a-form-item>
         <a-form-item field="post" label="应用图标">
-          <a-input v-model="form.appIcon" placeholder="请输入你的应用图标" />
+          <PictureUpload :onChange="getAppIconUrl" />
         </a-form-item>
         <a-form-item field="appType" label="应用类型">
           <a-select
@@ -47,7 +47,16 @@
         <div>
           <a-form-item class="choose_button">
             <a-col flex="auto">
-              <a-button class="login_button" html-type="submit">创建</a-button>
+              <a-button
+                class="login_button"
+                v-if="props.appId"
+                html-type="submit"
+              >
+                修改
+              </a-button>
+              <a-button class="login_button" v-else html-type="submit">
+                创建
+              </a-button>
             </a-col>
           </a-form-item>
         </div>
@@ -57,23 +66,26 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, withDefaults, defineProps, watchEffect } from "vue";
+import { defineProps, ref, watch, watchEffect, withDefaults } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import API from "@/api";
 import { useRouter } from "vue-router";
-import { useLoginUserStore } from "@/store/userStore";
-import { userLoginUsingPost } from "@/api/userController";
 import {
   addAppUsingPost,
   editAppUsingPost,
   getAppVoByIdUsingGet,
 } from "@/api/appController";
 import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
+import PictureUpload from "@/components/PictureUpload.vue";
 
 interface Props {
   appId: string;
 }
 
+const appIconUrl = ref<string>("");
+const getAppIconUrl = (url: any) => {
+  appIconUrl.value = url;
+};
 const props = withDefaults(defineProps<Props>(), {
   appId: () => {
     return "";
@@ -108,20 +120,39 @@ const loadData = async () => {
 watchEffect(() => {
   loadData();
 });
-const layout = ref("vertical");
-
+/**
+ * 监听路由变化,当页面切换到添加app界面时能够自动刷新页面被，而不是
+ */
 const router = useRouter();
+watch(
+  () => router.currentRoute.value.path,
+  () => {
+    location.reload();
+  }
+);
+
+// const layout = ref("vertical");
+
 /**
  * 提交表单
  */
 const AddAppSubmit = async () => {
   let res;
+  //如果是更新
   if (props.appId) {
+    //如果应用图标未上传
+    if (appIconUrl.value === "") {
+      form.value.appIcon = oldApp.value?.appIcon;
+    } else {
+      //如果上传了应用图标
+      form.value.appIcon = appIconUrl.value;
+    }
     res = await editAppUsingPost({
       id: props.appId as any,
       ...form.value,
     });
   } else {
+    form.value.appIcon = appIconUrl.value;
     res = await addAppUsingPost(form.value);
   }
   if (res.data.code === 0) {

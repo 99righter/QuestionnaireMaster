@@ -64,14 +64,14 @@ const data = ref<API.UserAnswerVO>({});
  */
 const loadData = async () => {
   if (!props.id) {
-    console.log("没有接收到id");
+    // console.log("没有接收到id");
     return;
   }
   const res = await getUserAnswerVoByIdUsingGet({
     id: props.id as any,
   });
   if (res.data.code === 0 && res.data.data) {
-    console.log("接收到的id是" + props.id);
+    // console.log("接收到的id是" + props.id);
     data.value = res.data.data;
   } else {
     message.error("获取数据失败，" + res.data.message);

@@ -72,7 +72,7 @@ const handleAiData = async () => {
   if (!props.appId) {
     return;
   }
-  console.log("生成题目的数量" + form.value.questionNum);
+  // console.log("生成题目的数量" + form.value.questionNum);
   generating.value = true;
   const res = await aiGenerateQuestionUsingPost({
     appId: props.appId as any,
@@ -97,7 +97,7 @@ const handleSseAIGenrate = async () => {
   if (!props.appId) {
     return;
   }
-  console.log("生成题目的数量" + form.value.questionNum);
+  // console.log("生成题目的数量" + form.value.questionNum);
   generating.value = true;
   const eventSource = new EventSource(
     //需要手动填写完整的后端地址
@@ -109,7 +109,7 @@ const handleSseAIGenrate = async () => {
    * @param event
    */
   eventSource.onopen = function (event) {
-    console.log("开始生成");
+    // console.log("开始生成");
     // message.success("开始生成");
     props.onSseStart?.(event);
     props.generateQuestionNumber?.(form.value.questionNum);
@@ -120,7 +120,7 @@ const handleSseAIGenrate = async () => {
    * @param event
    */
   eventSource.onmessage = function (event) {
-    console.log(event.data);
+    // console.log(event.data);
     props.onSseSuccess?.(JSON.parse(event.data));
   };
   /**
@@ -129,7 +129,7 @@ const handleSseAIGenrate = async () => {
    */
   eventSource.onerror = function (event) {
     if (event.eventPhase == EventSource.CLOSED) {
-      console.log("生成完成");
+      // console.log("生成完成");
       // message.success("生成完成");
       eventSource.close();
       props.onSseError?.(event);

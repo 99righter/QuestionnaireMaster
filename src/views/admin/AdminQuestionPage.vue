@@ -37,12 +37,17 @@
     @page-change="onPageChange"
   >
     <template #questionContent="{ record }">
-      <div
+      <a-collapse
         v-for="question in JSON.parse(record.questionContent)"
         :key="question.title"
       >
-        {{ question }}
-      </div>
+        <a-collapse-item :header="question.title">
+          <div v-for="option in question.options" :key="option.key">
+            {{ option.key }}.&nbsp;
+            {{ option.value }}
+          </div>
+        </a-collapse-item>
+      </a-collapse>
     </template>
     <template #createTime="{ record }">
       {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}

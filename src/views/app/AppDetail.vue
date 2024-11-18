@@ -7,6 +7,7 @@ import message from "@arco-design/web-vue/es/message";
 import { dayjs } from "@arco-design/web-vue/es/_utils/date";
 import { useLoginUserStore } from "@/store/userStore";
 import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
+import ShareCompent from "@/components/ShareCompent.vue";
 
 /**
  * 定义一个接口类型，里面的数据为app，类型为AppVO
@@ -36,6 +37,16 @@ const isMine = computed(() => {
  * 根据Appid获取应用
  */
 const data = ref<API.AppVO>({});
+const shareModel = ref();
+/**
+ * 分享方法
+ */
+const doShare = (e: Event) => {
+  if (shareModel.value) {
+    shareModel.value.handleClick();
+  }
+  e.stopPropagation();
+};
 
 /**
  * 获取应用
@@ -57,6 +68,7 @@ const router = useRouter();
 const goPage = (path: string) => {
   router.push(path);
 };
+const shareLink = `${window.location.protocol}//${window.location.host}/app/detail/${props.id}`;
 /**
  * 监听变量
  */
@@ -96,7 +108,8 @@ watchEffect(() => {
             <a-button type="primary" @click="goPage(`/answer/do/${id}`)"
               >开始答题
             </a-button>
-            <a-button>分享应用</a-button>
+            <!--            <ShareCompent :link="shareLink" />-->
+            <a-button @click="doShare">分享问卷</a-button>
             <a-button v-if="isMine" @click="goPage(`/add/question/${id}`)"
               >设置题目
             </a-button>
@@ -112,6 +125,7 @@ watchEffect(() => {
           <a-image width="100%" :src="data.appIcon" />
         </a-col>
       </a-row>
+      <ShareCompent ref="shareModel" :link="shareLink" />
     </a-card>
   </div>
 </template>

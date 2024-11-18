@@ -68,7 +68,7 @@ const router = useRouter();
  * 提交表单
  */
 const handleSubmit = async () => {
-  console.log("执行注册方法");
+  // console.log("执行注册方法");
   const res = await userRegisterUsingPost(form);
   if (res.data.code === 0) {
     message.success("注册成功");

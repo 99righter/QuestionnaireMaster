@@ -115,9 +115,9 @@ const submitting = ref(false);
  * 加载数据
  */
 const loadData = async () => {
-  console.log("获取数uuuu");
+  // console.log("获取数uuuu");
   if (!props.appId) {
-    console.log("appId 不存在");
+    // console.log("appId 不存在");
     return;
   }
   // 获取 app
@@ -126,7 +126,7 @@ const loadData = async () => {
   });
   if (res.data.code === 0) {
     app.value = res.data.data as any;
-    console.log("获取app成功");
+    // console.log("获取app成功");
   } else {
     message.error("获取应用失败，" + res.data.message);
   }
@@ -178,10 +178,10 @@ const doSubmit = async () => {
     id: id.value,
   });
   if (res.data.code === 0 && res.data.data) {
-    console.log("提交成功");
+    // console.log("提交成功");
     router.push(`/answer/result/${res.data.data}`);
   } else {
-    console.log("提交失败");
+    // console.log("提交失败");
     message.error("提交答案失败，" + res.data.message);
   }
   submitting.value = false;

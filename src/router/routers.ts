@@ -4,8 +4,6 @@ import UserLayout from "@/layouts/UserLayout.vue";
 import UserRegister from "@/views/user/UserRegister.vue";
 import UserLogin from "@/views/user/UserLogin.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
-import NoAuth from "@/views/user/NoAuth.vue";
-import MdEditor from "@/components/MdEditor.vue";
 import AdminUserPage from "@/views/admin/AdminUserPage.vue";
 import AdminAppPage from "@/views/admin/AdminAppPage.vue";
 import AdminQuestionPage from "@/views/admin/AdminQuestionPage.vue";
@@ -13,15 +11,13 @@ import AdminUserAnswerPage from "@/views/admin/AdminUserAnswerPage.vue";
 import AdminScoreResultPage from "@/views/admin/AdminScoreResultPage.vue";
 import AppDetail from "@/views/app/AppDetail.vue";
 import AddAppPage from "@/views/app/AddAppPage.vue";
-import AddQuestion from "@/views/question/AddQuestionPage.vue";
 import AddQuestionPage from "@/views/question/AddQuestionPage.vue";
-import AppScoreResultPage from "@/views/app/components/AppScoreResultPage.vue";
-import AddScoreResultPage from "@/views/app/AddScoreResultPage.vue";
 import DoAnswerPage from "@/views/answer/DoAnswerPage.vue";
 import AnswerResult from "@/views/answer/AnswerResult.vue";
 import MyAnswerPage from "@/views/answer/MyAnswerPage.vue";
 import UserCenter from "@/views/user/UserCenter.vue";
 import AdminBasePage from "@/views/admin/AdminBasePage.vue";
+import SocringResultOfApp from "@/views/app/SocringResultOfApp.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -38,14 +34,6 @@ export const routes: Array<RouteRecordRaw> = [
       hidInMenu: true,
     },
   },
-  // {
-  //   path: "/noAuth",
-  //   name: "无权限页面",
-  //   component: NoAuth,
-  //   meta: {
-  //     access: ACCESS_ENUM.ADMIN,
-  //   },
-  // },
   {
     path: "/add/app",
     name: "创建应用",
@@ -75,6 +63,7 @@ export const routes: Array<RouteRecordRaw> = [
     name: "管理员",
     meta: {
       access: ACCESS_ENUM.ADMIN,
+      showFather: true,
     },
     children: [
       {
@@ -83,6 +72,8 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminBasePage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
+          hidInMenu: true,
         },
       },
       {
@@ -91,6 +82,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminUserPage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
         },
       },
       {
@@ -99,6 +91,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminAppPage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
         },
       },
       {
@@ -107,6 +100,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminQuestionPage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
         },
       },
       {
@@ -115,6 +109,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminUserAnswerPage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
         },
       },
       {
@@ -123,10 +118,65 @@ export const routes: Array<RouteRecordRaw> = [
         component: AdminScoreResultPage,
         meta: {
           access: ACCESS_ENUM.ADMIN,
+          showFather: false,
         },
       },
     ],
   },
+  // {
+  //   path: "/admin/statistics",
+  //   name: "应用统计",
+  //   component: AdminBasePage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
+  // {
+  //   path: "/admin/user",
+  //   name: "用户管理",
+  //   component: AdminUserPage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
+  // {
+  //   path: "/admin/app",
+  //   name: "应用管理",
+  //   component: AdminAppPage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
+  // {
+  //   path: "/admin/question",
+  //   name: "题目管理",
+  //   component: AdminQuestionPage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
+  // {
+  //   path: "/admin/user_answer",
+  //   name: "用户答案管理",
+  //   component: AdminUserAnswerPage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
+  // {
+  //   path: "/admin/score_result",
+  //   name: "评分管理",
+  //   component: AdminScoreResultPage,
+  //   meta: {
+  //     access: ACCESS_ENUM.ADMIN,
+  //     showFather: false,
+  //   },
+  // },
   {
     path: "/user",
     name: "用户",
@@ -197,7 +247,7 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: "/add/scoringResult/:id",
     name: "设置评分规则",
-    component: AddScoreResultPage,
+    component: SocringResultOfApp,
     props: true,
     meta: {
       hidInMenu: true,

@@ -58,7 +58,7 @@ const router = useRouter();
  */
 
 const addQuestion = (index: number) => {
-  console.log("当前题目编号" + index);
+  // console.log("当前题目编号" + index);
   questionContent.value.splice(index, 0, {
     title: "",
     options: [],
@@ -100,7 +100,7 @@ const loadQuestion = async () => {
   if (!props.appId) {
     return;
   }
-  console.log("搜索的题目的应用id" + props.appId);
+  // console.log("搜索的题目的应用id" + props.appId);
   const res = await listQuestionVoByPageUsingPost({
     appId: props.appId as any,
     current: 1,
@@ -206,7 +206,7 @@ watchEffect(() => {
             :onSseSuccess="onAiGenerateSseSuccess"
             :onSseError="onSSEClose"
             :onSseStart="onSSEStart"
-            :generate-question-number="generateSchedule"
+            :generateQuestionNumber="generateSchedule"
           />
         </a-space>
         <a-space

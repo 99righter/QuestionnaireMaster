@@ -64,20 +64,6 @@
     </template>
     <template #optional="{ record }">
       <a-space>
-        <a-button
-          v-if="record.reviewStatus !== REVIEW_STATUS_ENUM.PASS"
-          status="success"
-          @click="doReview(record, REVIEW_STATUS_ENUM.PASS, '')"
-        >
-          通过
-        </a-button>
-        <a-button
-          v-if="record.reviewStatus !== REVIEW_STATUS_ENUM.REJECT"
-          status="warning"
-          @click="doReview(record, REVIEW_STATUS_ENUM.REJECT, '不符合上架要求')"
-        >
-          拒绝
-        </a-button>
         <a-button status="danger" @click="doDelete(record)">删除</a-button>
       </a-space>
     </template>
@@ -85,11 +71,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { defineProps, ref, watchEffect, withDefaults } from "vue";
 import {
   deleteAppUsingPost,
   doAppReviewUsingPost,
   listAppByPageUsingPost,
+  listMyAppVoByPageUsingPost,
 } from "@/api/appController";
 import API from "@/api";
 import message from "@arco-design/web-vue/es/message";
@@ -100,6 +87,16 @@ import {
   REVIEW_STATUS_ENUM,
   REVIEW_STATUS_MAP,
 } from "@/constant/app";
+
+interface Props {
+  userId?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  userId: () => {
+    return 0;
+  },
+});
 
 const formSearchParams = ref<API.AppQueryRequest>({});
 
@@ -119,7 +116,13 @@ const total = ref<number>(0);
  * 加载数据
  */
 const loadData = async () => {
-  const res = await listAppByPageUsingPost(searchParams.value);
+  let res;
+  if (props.userId) {
+    searchParams.value.userId = props.userId;
+    res = await listMyAppVoByPageUsingPost(searchParams.value);
+  } else {
+    res = await listAppByPageUsingPost(searchParams.value);
+  }
   if (res.data.code === 0) {
     dataList.value = res.data.data?.records || [];
     total.value = res.data.data?.total || 0;
