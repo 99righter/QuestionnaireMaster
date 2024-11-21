@@ -27,8 +27,6 @@ import java.util.Date;
 /**
  * 问卷接口
  *
- 
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
 @RequestMapping("/app")
@@ -53,10 +51,11 @@ public class AppController {
     @PostMapping("/add")
     @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Long> addApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
+        //判断传入参数是否为空
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         //  在此处将实体类和 DTO 进行转换
         App app = new App();
-        BeanUtils.copyProperties(appAddRequest, app);
+        BeanUtils.copyProperties(appAddRequest, app);//会将属性相同的字段复制给后面那个对象
         // 数据校验
         appService.validApp(app, true);
         //  填充默认值
@@ -65,9 +64,11 @@ public class AppController {
         app.setReviewStatus(ReviewTypeEnum.REVIEWING.getValue());
         // 写入数据库
         boolean result = appService.save(app);
+        //如果结果错误则抛出异常
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         // 返回新写入的数据 id
         long newAppId = app.getId();
+        //成功则返回正确的结果
         return ResultUtils.success(newAppId);
     }
 
@@ -79,14 +80,16 @@ public class AppController {
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Boolean> deleteApp(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        //判断传入参数是否正确
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //获取当前登录的用户
         User user = userService.getLoginUser(request);
         long id = deleteRequest.getId();
-        // 判断是否存在
+        // 判断问卷是否存在
         App oldApp = appService.getById(id);
         ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
@@ -108,14 +111,16 @@ public class AppController {
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateApp(@RequestBody AppUpdateRequest appUpdateRequest) {
+        //判断参数是否异常
         if (appUpdateRequest == null || appUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 在此处将实体类和 DTO 进行转换
         App app = new App();
+        BeanUtils.copyProperties(appUpdateRequest, app);
         // 数据校验
         appService.validApp(app, false);
-        // 判断是否存在
+        // 判断旧的问卷是否存在
         long id = appUpdateRequest.getId();
         App oldApp = appService.getById(id);
         ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
@@ -133,6 +138,7 @@ public class AppController {
      */
     @GetMapping("/get/vo")
     public BaseResponse<AppVO> getAppVOById(long id, HttpServletRequest request) {
+        //判断参数是否异常
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         App app = appService.getById(id);
@@ -150,11 +156,12 @@ public class AppController {
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<App>> listAppByPage(@RequestBody AppQueryRequest appQueryRequest) {
+        //获取分页信息，当前页面以及页码大小
         long current = appQueryRequest.getCurrent();
         long size = appQueryRequest.getPageSize();
-        // 查询数据库
+        // 查询数据库，AppQueryRequest 封装了查询条件，只需要传给service方法构造一个查询器即可
         Page<App> appPage = appService.page(new Page<>(current, size),
-                appService.getQueryWrapper(appQueryRequest));
+                appService.getQueryWrapper(appQueryRequest));//构造了一个查询器，将查询器传给appService的page方法。
         return ResultUtils.success(appPage);
     }
 
@@ -220,6 +227,7 @@ public class AppController {
         }
         // 在此处将实体类和 DTO 进行转换
         App app = new App();
+        //BeanUtils.copyProperties方法会将字段相同的属性自动赋值，即将appEditRequest里面的值赋给app
         BeanUtils.copyProperties(appEditRequest, app);
         // 数据校验
         appService.validApp(app, false);
@@ -252,9 +260,13 @@ public class AppController {
     @PostMapping("/review")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> doAppReview(@RequestBody ReviewRequest reviewRequest, HttpServletRequest request) {
+        //判断参数
         ThrowUtils.throwIf(reviewRequest == null, ErrorCode.PARAMS_ERROR, "请求参数为空");
+        //获取前端传入的审核的id
         Long id = reviewRequest.getId();
+        //获取前端传入的审核状态的状态码
         Integer reviewStatus = reviewRequest.getReviewStatus();
+        //从枚举类中获取前端传入的审核状态
         ReviewTypeEnum reviewTypeEnum = ReviewTypeEnum.getEnumByValue(reviewStatus);
         if (id == null || reviewTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "审核状态不存在");
@@ -271,9 +283,9 @@ public class AppController {
         App app = new App();
         app.setId(id);
         app.setReviewStatus(reviewStatus);
-        app.setReviewerId(loginUser.getId());
+        app.setReviewerId(loginUser.getId());//写入审核人id
         app.setReviewTime(new Date());
-        boolean result = appService.updateById(app);
+        boolean result = appService.updateById(app);//更新数据库中的状态
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "审核操作失败");
         return ResultUtils.success(true);
 

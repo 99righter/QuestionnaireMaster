@@ -16,8 +16,6 @@ import java.util.List;
 /**
  * 题目服务
  *
- 
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 public interface QuestionService extends IService<Question> {
 

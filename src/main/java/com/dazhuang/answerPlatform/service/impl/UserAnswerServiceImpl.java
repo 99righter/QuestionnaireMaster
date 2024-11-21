@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
 /**
  * 用户答案服务实现
  *
- 
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Service
 @Slf4j
@@ -58,11 +56,6 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         Integer appType = userAnswer.getAppType();
         Integer scoringStrategy = userAnswer.getScoringStrategy();
         String choices = userAnswer.getChoices();
-//        Long resultId = userAnswer.getResultId();
-//        String resultName = userAnswer.getResultName();
-//        String resultDesc = userAnswer.getResultDesc();
-//        String resultPicture = userAnswer.getResultPicture();
-//        Integer resultScore = userAnswer.getResultScore();
         Long userId = userAnswer.getUserId();
 
 
@@ -71,17 +64,7 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
             // todo 补充校验规则
             ThrowUtils.throwIf(ObjectUtils.isEmpty(id),ErrorCode.PARAMS_ERROR,"用户答案编号为空");
             ThrowUtils.throwIf(ObjectUtils.isEmpty(appId),ErrorCode.PARAMS_ERROR,"问卷编号为空");
-//            AppTypeEnum appTypeEnum  = AppTypeEnum.getEnumByValue(appType);
-//            ThrowUtils.throwIf(appTypeEnum == null, ErrorCode.PARAMS_ERROR,"问卷类型不存在");
-//            AppScoringStrategyEnum appScoringStrategyEnum = AppScoringStrategyEnum.getEnumByValue(scoringStrategy);
-//            ThrowUtils.throwIf(appScoringStrategyEnum == null,ErrorCode.PARAMS_ERROR,"评分类型不存在");
             ThrowUtils.throwIf(StringUtils.isBlank(choices),ErrorCode.PARAMS_ERROR,"用户答案为空");
-//            ThrowUtils.throwIf(ObjectUtils.isEmpty(resultId),ErrorCode.PARAMS_ERROR,"用户答案结果编号为空");
-//            ThrowUtils.throwIf(ObjectUtils.isEmpty(resultScore),ErrorCode.PARAMS_ERROR,"得分范围为空");
-//            ThrowUtils.throwIf(StringUtils.isBlank(resultName),ErrorCode.PARAMS_ERROR,"用户答案名为空");
-//            ThrowUtils.throwIf(StringUtils.isBlank(resultDesc),ErrorCode.PARAMS_ERROR,"答案描述为空");
-//            ThrowUtils.throwIf(StringUtils.isBlank(resultPicture),ErrorCode.PARAMS_ERROR,"答案图片为空");
-//            ThrowUtils.throwIf(ObjectUtils.isEmpty(userId),ErrorCode.PARAMS_ERROR,"用户编号为空");
         }
         // 修改数据时，有参数则校验
         // todo 补充校验规则
@@ -177,24 +160,6 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         }
         UserVO userVO = userService.getUserVO(user);
         userAnswerVO.setUser(userVO);
-//        // 2. 已登录，获取用户点赞、收藏状态
-//        long userAnswerId = userAnswer.getId();
-//        User loginUser = userService.getLoginUserPermitNull(request);
-//        if (loginUser != null) {
-//            // 获取点赞
-//            QueryWrapper<UserAnswerThumb> userAnswerThumbQueryWrapper = new QueryWrapper<>();
-//            userAnswerThumbQueryWrapper.in("userAnswerId", userAnswerId);
-//            userAnswerThumbQueryWrapper.eq("userId", loginUser.getId());
-//            UserAnswerThumb userAnswerThumb = userAnswerThumbMapper.selectOne(userAnswerThumbQueryWrapper);
-//            userAnswerVO.setHasThumb(userAnswerThumb != null);
-//            // 获取收藏
-//            QueryWrapper<UserAnswerFavour> userAnswerFavourQueryWrapper = new QueryWrapper<>();
-//            userAnswerFavourQueryWrapper.in("userAnswerId", userAnswerId);
-//            userAnswerFavourQueryWrapper.eq("userId", loginUser.getId());
-//            UserAnswerFavour userAnswerFavour = userAnswerFavourMapper.selectOne(userAnswerFavourQueryWrapper);
-//            userAnswerVO.setHasFavour(userAnswerFavour != null);
-//        }
-        // endregion
 
         return userAnswerVO;
     }
@@ -224,27 +189,6 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         Set<Long> userIdSet = userAnswerList.stream().map(UserAnswer::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
-        // 2. 已登录，获取用户点赞、收藏状态
-//        Map<Long, Boolean> userAnswerIdHasThumbMap = new HashMap<>();
-//        Map<Long, Boolean> userAnswerIdHasFavourMap = new HashMap<>();
-//        User loginUser = userService.getLoginUserPermitNull(request);
-//        if (loginUser != null) {
-//            Set<Long> userAnswerIdSet = userAnswerList.stream().map(UserAnswer::getId).collect(Collectors.toSet());
-//            loginUser = userService.getLoginUser(request);
-//            // 获取点赞
-//            QueryWrapper<UserAnswerThumb> userAnswerThumbQueryWrapper = new QueryWrapper<>();
-//            userAnswerThumbQueryWrapper.in("userAnswerId", userAnswerIdSet);
-//            userAnswerThumbQueryWrapper.eq("userId", loginUser.getId());
-//            List<UserAnswerThumb> userAnswerUserAnswerThumbList = userAnswerThumbMapper.selectList(userAnswerThumbQueryWrapper);
-//            userAnswerUserAnswerThumbList.forEach(userAnswerUserAnswerThumb -> userAnswerIdHasThumbMap.put(userAnswerUserAnswerThumb.getUserAnswerId(), true));
-//            // 获取收藏
-//            QueryWrapper<UserAnswerFavour> userAnswerFavourQueryWrapper = new QueryWrapper<>();
-//            userAnswerFavourQueryWrapper.in("userAnswerId", userAnswerIdSet);
-//            userAnswerFavourQueryWrapper.eq("userId", loginUser.getId());
-//            List<UserAnswerFavour> userAnswerFavourList = userAnswerFavourMapper.selectList(userAnswerFavourQueryWrapper);
-//            userAnswerFavourList.forEach(userAnswerFavour -> userAnswerIdHasFavourMap.put(userAnswerFavour.getUserAnswerId(), true));
-//        }
-        // 填充信息
         userAnswerVOList.forEach(userAnswerVO -> {
             Long userId = userAnswerVO.getUserId();
             User user = null;
@@ -252,8 +196,6 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
                 user = userIdUserListMap.get(userId).get(0);
             }
             userAnswerVO.setUser(userService.getUserVO(user));
-//            userAnswerVO.setHasThumb(userAnswerIdHasThumbMap.getOrDefault(userAnswerVO.getId(), false));
-//            userAnswerVO.setHasFavour(userAnswerIdHasFavourMap.getOrDefault(userAnswerVO.getId(), false));
         });
         // endregion
 

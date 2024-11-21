@@ -15,8 +15,6 @@ import java.util.List;
 /**
  * 问卷服务
  *
-
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 public interface AppService extends IService<App> {
 

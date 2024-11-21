@@ -54,15 +54,17 @@ public class ScoringResultController {
     @PostMapping("/add")
     @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Long> addScoringResult(@RequestBody ScoringResultAddRequest scoringResultAddRequest, HttpServletRequest request) {
+        //判断前端传入的参数
         ThrowUtils.throwIf(scoringResultAddRequest == null, ErrorCode.PARAMS_ERROR);
-        // todo 在此处将实体类和 DTO 进行转换
+        //在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
-        BeanUtils.copyProperties(scoringResultAddRequest, scoringResult);
+        BeanUtils.copyProperties(scoringResultAddRequest, scoringResult);//会将属性相同的字段复制给后面那个对象
+        //因为scoringResultAddRequest里面的resultProp和scoringResult的resultProp结构不一样，所以需要经过转化为json字符串存入
         List<String> resultProp = scoringResultAddRequest.getResultProp();
         scoringResult.setResultProp(JSONUtil.toJsonStr(resultProp));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, true);
-        // todo 填充默认值
+        //填充默认值
         User loginUser = userService.getLoginUser(request);
         scoringResult.setUserId(loginUser.getId());
         // 写入数据库
@@ -224,15 +226,14 @@ public class ScoringResultController {
         if (scoringResultEditRequest == null || scoringResultEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // todo 在此处将实体类和 DTO 进行转换
+        //在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultEditRequest, scoringResult);
-//        List<String> resultProp = JSONUtil.toList(scoringResultEditRequest.getResultProp());
-        scoringResult.setResultDesc(JSONUtil.toJsonStr(scoringResultEditRequest.getResultProp()));
+        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultEditRequest.getResultProp()));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, false);
         User loginUser = userService.getLoginUser(request);
-        // 判断是否存在
+        // 判断原先的结果是否存在
         long id = scoringResultEditRequest.getId();
         ScoringResult oldScoringResult = scoringResultService.getById(id);
         ThrowUtils.throwIf(oldScoringResult == null, ErrorCode.NOT_FOUND_ERROR);

@@ -14,8 +14,6 @@ import java.util.List;
 /**
  * 答题结果视图
  *
- 
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Data
 public class ScoringResultVO implements Serializable {

@@ -35,8 +35,6 @@ import java.util.List;
 
 /**
  * 用户答案接口
- *
-
  */
 @RestController
 @RequestMapping("/userAnswer")
@@ -110,18 +108,22 @@ public class UserAnswerController {
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Boolean> deleteUserAnswer(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         UserAnswer oldUserAnswer = userAnswerService.getById(id);
         ThrowUtils.throwIf(oldUserAnswer == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可删除
-        if (!oldUserAnswer.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        //获取问卷信息
+        long appId = oldUserAnswer.getAppId();
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 仅本人创建的问卷或管理员可删除
+        User user = userService.getLoginUser(request);
+        if (!app.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // 操作数据库
@@ -187,6 +189,8 @@ public class UserAnswerController {
     public BaseResponse<Page<UserAnswer>> listUserAnswerByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest) {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         Page<UserAnswer> userAnswerPage = userAnswerService.page(new Page<>(current, size), userAnswerService.getQueryWrapper(userAnswerQueryRequest));
         return ResultUtils.success(userAnswerPage);
@@ -204,6 +208,19 @@ public class UserAnswerController {
     public BaseResponse<Page<UserAnswerVO>> listUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest, HttpServletRequest request) {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
+        //获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        //如果当前登录用户不是管理员，那么只能查看自己创建的问卷的用户答案
+        if (!loginUser.getUserRole().equals(UserConstant.ADMIN_ROLE)) {
+            //获取问卷信息，目的是为了判断是否用户创建的问卷，只有用户创建的问卷，或者是管理员才有权限查看
+            long appId = userAnswerQueryRequest.getAppId();
+            App app = appService.getById(appId);
+            ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "问卷不存在");
+            //如果不是自己创建的问卷则抛出无权限查看异常
+            if (!app.getUserId().equals(loginUser.getId())) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限查看");
+            }
+        }
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查询数据库

@@ -6,7 +6,6 @@ import com.dazhuang.answerPlatform.common.BaseResponse;
 import com.dazhuang.answerPlatform.common.DeleteRequest;
 import com.dazhuang.answerPlatform.common.ErrorCode;
 import com.dazhuang.answerPlatform.common.ResultUtils;
-import com.dazhuang.answerPlatform.config.WxOpenConfig;
 import com.dazhuang.answerPlatform.constant.UserConstant;
 import com.dazhuang.answerPlatform.exception.BusinessException;
 import com.dazhuang.answerPlatform.exception.ThrowUtils;
@@ -15,11 +14,7 @@ import com.dazhuang.answerPlatform.model.entity.User;
 import com.dazhuang.answerPlatform.model.vo.LoginUserVO;
 import com.dazhuang.answerPlatform.model.vo.UserVO;
 import com.dazhuang.answerPlatform.service.UserService;
-import com.dazhuang.answerPlatform.utils.MinioUtils;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
@@ -27,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 import static com.dazhuang.answerPlatform.service.impl.UserServiceImpl.SALT;
@@ -46,11 +40,8 @@ public class UserController {
     @Resource
     private UserService userService;
 
-    @Resource
-    private WxOpenConfig wxOpenConfig;
 
-    @Resource
-    private MinioUtils minioUtils;
+
 
     // region 登录相关
 
@@ -62,14 +53,16 @@ public class UserController {
      */
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+        //判断传入参数是否为空
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //对象参数内的值都不能为空，如果为空则抛出参数异常
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
@@ -92,32 +85,12 @@ public class UserController {
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //会进行登录操作，同时将当前登录用户保存在session中
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(loginUserVO);
     }
 
-    /**
-     * 用户登录（微信开放平台）
-     */
-    @GetMapping("/login/wx_open")
-    public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam("code") String code) {
-        WxOAuth2AccessToken accessToken;
-        try {
-            WxMpService wxService = wxOpenConfig.getWxMpService();
-            accessToken = wxService.getOAuth2Service().getAccessToken(code);
-            WxOAuth2UserInfo userInfo = wxService.getOAuth2Service().getUserInfo(accessToken, code);
-            String unionId = userInfo.getUnionId();
-            String mpOpenId = userInfo.getOpenid();
-            if (StringUtils.isAnyBlank(unionId, mpOpenId)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-            }
-            return ResultUtils.success(userService.userLoginByMpOpen(userInfo, request));
-        } catch (Exception e) {
-            log.error("userLoginByWxOpen error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-        }
-    }
+
 
     /**
      * 用户注销
@@ -151,7 +124,7 @@ public class UserController {
     // region 增删改查
 
     /**
-     * 创建用户
+     * 创建用户（管理员使用）
      *
      * @param userAddRequest
      * @param request
@@ -167,7 +140,7 @@ public class UserController {
         BeanUtils.copyProperties(userAddRequest, user);
         // 默认密码 12345678
         String defaultPassword = "12345678";
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + defaultPassword).getBytes());
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + defaultPassword).getBytes());//对密码进行加密
         user.setUserPassword(encryptPassword);
         boolean result = userService.save(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -187,7 +160,7 @@ public class UserController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean b = userService.removeById(deleteRequest.getId());
+        boolean b = userService.removeById(deleteRequest.getId());//根据id删除用户
         return ResultUtils.success(b);
     }
 
@@ -206,7 +179,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = new User();
-        BeanUtils.copyProperties(userUpdateRequest, user);
+        BeanUtils.copyProperties(userUpdateRequest, user);//会将属性相同的字段复制给后面那个对象
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
@@ -281,9 +254,10 @@ public class UserController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<User> userPage = userService.page(new Page<>(current, size),
-                userService.getQueryWrapper(userQueryRequest));
-        Page<UserVO> userVOPage = new Page<>(current, size, userPage.getTotal());
+                userService.getQueryWrapper(userQueryRequest));//将查询参数传给getQueryWrapper方法，构造了一个条件查询器
         List<UserVO> userVO = userService.getUserVO(userPage.getRecords());
+        //将前面查询到的User类对象变成UserVo对象
+        Page<UserVO> userVOPage = new Page<>(current, size, userPage.getTotal());
         userVOPage.setRecords(userVO);
         return ResultUtils.success(userVOPage);
     }
@@ -305,7 +279,7 @@ public class UserController {
         }
         User loginUser = userService.getLoginUser(request);
         User user = new User();
-        BeanUtils.copyProperties(userUpdateMyRequest, user);
+        BeanUtils.copyProperties(userUpdateMyRequest, user);//会将属性相同的字段复制给后面那个对象
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);

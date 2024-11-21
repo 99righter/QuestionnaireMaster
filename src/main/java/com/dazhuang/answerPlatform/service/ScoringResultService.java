@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 答题结果服务
  *
-
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 public interface ScoringResultService extends IService<ScoringResult> {
 

@@ -14,8 +14,6 @@ import java.util.List;
 /**
  * 用户答案视图
  *
- 
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Data
 public class UserAnswerVO implements Serializable {

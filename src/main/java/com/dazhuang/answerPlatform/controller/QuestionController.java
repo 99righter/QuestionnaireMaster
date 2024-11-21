@@ -31,8 +31,6 @@ import java.util.List;
 /**
  * 题目接口
  *
-
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
 @RequestMapping("/question")
@@ -57,21 +55,21 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
+        //判断前端传入参数是否为空
         ThrowUtils.throwIf(questionAddRequest == null, ErrorCode.PARAMS_ERROR);
         //在此处将实体类和 DTO 进行转换
         Question question = new Question();
-        BeanUtils.copyProperties(questionAddRequest, question);
+        BeanUtils.copyProperties(questionAddRequest, question);//会将属性相同的字段复制给后面那个对象
         List<QuestionContentDTO> questionContentDTO = questionAddRequest.getQuestionContent();
-        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
+        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));//将问题列表转化为json字段处理
         // 数据校验
         questionService.validQuestion(question, true);
         //  填充默认值
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
         // 填充问卷id
-        List<QuestionContentDTO> questionContent = questionAddRequest.getQuestionContent();
         Long appId = questionAddRequest.getAppId();
         question.setAppId(appId);
         // 写入数据库
@@ -90,8 +88,9 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        //判断前端传入参数是否为空
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -146,6 +145,7 @@ public class QuestionController {
      * @return
      */
     @GetMapping("/get/vo")
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<QuestionVO> getQuestionVOById(long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
@@ -164,11 +164,12 @@ public class QuestionController {
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<Question>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest) {
+        //获取当前页面以及页码
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
         // 查询数据库
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+                questionService.getQueryWrapper(questionQueryRequest));//将查询参数传给getQueryWrapper方法，构造了一个条件查询器
         return ResultUtils.success(questionPage);
     }
 
@@ -180,6 +181,7 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/list/page/vo")
+    @AuthCheck(mustRole = UserConstant.USER_LOGIN_STATE)
     public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                                HttpServletRequest request) {
         long current = questionQueryRequest.getCurrent();
